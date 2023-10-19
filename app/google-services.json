@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "695689115729",
+    "project_id": "codethon-1",
+    "storage_bucket": "codethon-1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:695689115729:android:1c8d18e56f45326067e070",
+        "android_client_info": {
+          "package_name": "com.event.cryptothon"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjskAxDQ9kXtgFUez8bZZPz1dhld30yd8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
