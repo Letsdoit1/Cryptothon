@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Cryptothon</string>
+    <string name="title_activity_fullscreen">Welcome</string>
 </resources>
