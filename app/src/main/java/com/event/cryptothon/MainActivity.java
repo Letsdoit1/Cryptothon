@@ -17,8 +17,18 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
-
     public static final String TAG = "MainActivity";
+    public static final boolean EMULATED = true;
+
+    public FirebaseDatabase getDB(){
+        if(EMULATED){
+            FirebaseDatabase db = FirebaseDatabase.getInstance();
+            db.useEmulator("10.0.2.2",9000);
+            return db;
+        }else{
+            return FirebaseDatabase.getInstance("https://codethon-1-default-rtdb.asia-southeast1.firebasedatabase.app");
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,11 +37,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void tempBtnClicked(View view) {
-        FirebaseDatabase db = FirebaseDatabase.getInstance("https://codethon-1-default-rtdb.asia-southeast1.firebasedatabase.app");
+        FirebaseDatabase db = getDB();
+
+
         DatabaseReference myRef = db.getReference("temp");
         myRef.setValue("Sumant");
         HashMap<String, String> hm = new HashMap<>();
-        hm.put("key1", "Value1");
+        hm.put("key1", "Valuex");
         hm.put("key2", "Value2");
         myRef.setValue(hm);
 
