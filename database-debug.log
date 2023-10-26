@@ -1,9 +1,9 @@
-11:18:40.486 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
-11:18:40.851 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9000
-11:18:53.597 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO com.firebase.core.namespace.NamespaceActor - codethon-1-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 121ms, init: 0ms
-11:18:53.687 [NamespaceSystem-blocking-namespace-operation-dispatcher-6] INFO com.firebase.core.namespace.StateManager - Namespace codethon-1-default-rtdb status Active to Active
-18:50:11.497 [FirebaseWorkerPool-1-4] WARN com.firebase.core.persistence.backend.dummy.EmulatorMetadataPersistence - Multiple projectIds are not recommended in single project mode. Requested 
+21:59:34.861 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
+21:59:34.999 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9000
+21:59:47.557 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO com.firebase.core.namespace.NamespaceActor - codethon-1-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 111ms, init: 0ms
+21:59:47.635 [NamespaceSystem-blocking-namespace-operation-dispatcher-6] INFO com.firebase.core.namespace.StateManager - Namespace codethon-1-default-rtdb status Active to Active
+22:02:05.509 [FirebaseWorkerPool-1-3] WARN com.firebase.core.persistence.backend.dummy.EmulatorMetadataPersistence - Multiple projectIds are not recommended in single project mode. Requested 
 namespace codethon-1, but the emulator is configured for codethon-1-default-rtdb. To 
 opt-out of single project mode add/set the singleProjectMode: false property in 
 the firebase.json emulators config. 
-18:50:11.558 [NamespaceSystem-akka.actor.default-dispatcher-15] INFO com.firebase.core.namespace.NamespaceActor - codethon-1 successfully activated FBKV (SurveyIdle(0)) wait: 16ms, init: 0ms
+22:02:05.516 [NamespaceSystem-akka.actor.default-dispatcher-9] INFO com.firebase.core.namespace.NamespaceActor - codethon-1 successfully activated FBKV (SurveyIdle(0)) wait: 2ms, init: 0ms
