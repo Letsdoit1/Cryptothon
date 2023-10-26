@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Crypto-Thon</string>
+    <string name="wrong_pwd_msg">Wrong password, try again.</string>
+    <string name="max_devices_reached">Max number of devices already registered. </string>
+    <string name="device">Device</string>
+    <string name="unknown_error">Unknown Error, please contact admin via your PL.</string>
 </resources>

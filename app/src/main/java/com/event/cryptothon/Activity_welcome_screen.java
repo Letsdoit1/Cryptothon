@@ -9,8 +9,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
-import android.widget.Toast;
 
+import com.event.cryptothon.models.RegistrationStatus;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -29,52 +29,57 @@ public class Activity_welcome_screen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome_screen);
-        Context activityContext = this;
         new Handler().postDelayed(new Runnable() {
-            Boolean isRegistered = false;
+            RegistrationStatus isRegistered = null;
             @Override
             public void run() {
                 mFunctions = FirebaseFunctions.getInstance();
-                if(FirebaseHelper.EMULATOR_RUNNING)
-                    mFunctions.useEmulator("10.0.2.2",5001);
+                if (FirebaseHelper.EMULATOR_RUNNING)
+                    mFunctions.useEmulator("10.0.2.2", 5001);
                 //Getting DeviceID or AnroidID
                 String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
                 getRegistrationStatus(deviceId)
-                        .addOnCompleteListener(new OnCompleteListener<Boolean>() {
+                        .addOnCompleteListener(new OnCompleteListener<RegistrationStatus>() {
                             @Override
-                            public void onComplete(@NonNull Task<Boolean> task) {
-                                if(!task.isSuccessful()){
+                            public void onComplete(@NonNull Task<RegistrationStatus> task) {
+                                if (!task.isSuccessful()) {
                                     Exception e = task.getException();
                                     String error = null;
-                                    if(e instanceof FirebaseFunctionsException)
+                                    if (e instanceof FirebaseFunctionsException)
                                         error = "FirebaseFunctionException Code = " + ((FirebaseFunctionsException) e).getCode() + ", " + e.getMessage();
                                     else
                                         error = "FirebaseFunctionException Code = " + e.getMessage();
-                                    error = "DeviceId="+deviceId+", "+error;
+                                    error = "DeviceId=" + deviceId + ", " + error;
                                     Log.w(TAG, error);
 //                                    Toast.makeText(activityContext,error,Toast.LENGTH_LONG).show();
                                     return;
                                 }
                                 isRegistered = task.getResult();
+                                if (isRegistered!=null && isRegistered.isRegistered()){
+                                    Intent intent = new Intent(Activity_welcome_screen.this, MainActivity.class);
+                                    intent.putExtra("TEAM_CODE",isRegistered.getTeamPassword());
+                                    startActivity(intent);
+                                }
+                                else
+                                    startActivity(new Intent(Activity_welcome_screen.this, Activity_Login.class));
                             }
                         });
-                if(isRegistered)
-                    startActivity(new Intent(Activity_welcome_screen.this, MainActivity.class));
-                else
-                    startActivity(new Intent(Activity_welcome_screen.this, Activity_Login.class));
                 finish();
             }
 
-            private Task<Boolean> getRegistrationStatus(String deviceId) {
+            private Task<RegistrationStatus> getRegistrationStatus(String deviceId) {
                 Map<String,Object> data = new HashMap<>();
                 data.put("deviceId", deviceId);
                 return mFunctions.getHttpsCallable("isRegisteredDevice")
                         .call(data)
-                        .continueWith(new Continuation<HttpsCallableResult, Boolean>() {
+                        .continueWith(new Continuation<HttpsCallableResult, RegistrationStatus>() {
                             @Override
-                            public Boolean then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                            public RegistrationStatus then(@NonNull Task<HttpsCallableResult> task) throws Exception {
                                 Map<String, Object> result = (Map<String, Object>) task.getResult().getData();
-                                return (Boolean) result.get("registrationStatus");
+                                RegistrationStatus rs = new RegistrationStatus();
+                                rs.setRegistered((Boolean) result.get("registrationStatus"));
+                                rs.setTeamPassword((String) result.get("teamPassword"));
+                                return rs;
                             }
                         });
             }
