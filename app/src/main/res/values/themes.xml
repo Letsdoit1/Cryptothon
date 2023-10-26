@@ -15,5 +15,11 @@
         <item name="android:background">@drawable/welcome</item>
     </style>
 
+    <style name="Theme.Cryptothon.Editbox">
+        <item name="android:ems">10</item>
+        <item name="android:textColorHint">#C63E75B8</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
 
 </resources>

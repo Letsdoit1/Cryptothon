@@ -2,27 +2,37 @@ package com.event.cryptothon;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.widget.TextView;
 
+import com.event.cryptothon.databinding.ActivityMainBinding;
 import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.functions.FirebaseFunctionsException;
 import com.google.firebase.functions.HttpsCallableResult;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-    public static final String TAG = "MainActivity";
+    public static final String TAG = "CryptothonMainActivity";
     public static final boolean EMULATED = true;
+
+    FirebaseFunctions mFunctions;
 
     public FirebaseDatabase getDB(){
         if(EMULATED){
@@ -38,28 +48,65 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        mFunctions = FirebaseFunctions.getInstance();
+
+        if(EMULATED)
+            mFunctions.useEmulator("10.0.2.2",5001);
+    }
+
+    private Task<Integer> addNumbers(int a, int b){
+        Map<String, Object> data = new HashMap<>();
+        data.put("firstNumber", a);
+        data.put("secondNumber", b);
+
+//        return mFunctions.getHttpsCallable("addNumbers")
+        return mFunctions.getHttpsCallable("addNumbers")
+                .call(data)
+                .continueWith(new Continuation<HttpsCallableResult, Integer>() {
+                    @Override
+                    public Integer then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                        Map<String, Object> result = (Map<String, Object>) task.getResult().getData();
+                        return (Integer)result.get("operationResult");
+                    }
+                });
     }
 
     public void tempBtnClicked(View view) {
+//        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+//        ((TextView)findViewById(R.id.txtAnswer)).setText(deviceId);
 
-        FirebaseFunctions mFunctions = FirebaseFunctions.getInstance();
-        mFunctions.useEmulator("10.0.2.2",5001);
+        int firstNumber = 5;
+        int secondNumber = 10;
 
-        HashMap<String, String> dataMap = new HashMap<>();
-        dataMap.put("keyA", "ValueA");
-        dataMap.put("keyB", "ValueB");
-
-        String s = String.valueOf(mFunctions.getHttpsCallable("addMessage")
-                .call(dataMap)
-                .continueWith(new Continuation<HttpsCallableResult, String>() {
+        addNumbers(firstNumber, secondNumber)
+                .addOnCompleteListener(new OnCompleteListener<Integer>() {
                     @Override
-                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
-                        String result = (String) task.getResult().getData();
-                        return result;
-                    }
-                }));
+                    public void onComplete(@NonNull Task<Integer> task) {
 
-        Log.d(TAG, "Sumant: "+s);
+                        if(!task.isSuccessful()){
+                            Exception e = task.getException();
+                            if(e instanceof FirebaseFunctionsException){
+                                FirebaseFunctionsException ffe = (FirebaseFunctionsException) e;
+                                FirebaseFunctionsException.Code code = ffe.getCode();
+                                Log.i(TAG, "code = "+code.toString());
+                                Object details = ffe.getDetails();
+                                if(details != null)
+                                    Log.i(TAG, "details = "+details.toString());
+                            }
+                            Log.i(TAG, "Failure e = "+e);
+                        }
+                        try {
+                            Integer result = task.getResult();
+                            ((TextView)findViewById(R.id.txtAnswer)).setText(result.toString());
+                        }catch(Exception e){
+                            Log.i(TAG, e.getMessage());
+                        }
+                    }
+                });
+
 
 
 //        FirebaseDatabase db = getDB();
