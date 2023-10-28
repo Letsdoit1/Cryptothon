@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     FirebaseFunctions mFunctions;
 
+
 //    public FirebaseDatabase getDB(){
 //        if(EMULATED){
 //            FirebaseDatabase db = FirebaseDatabase.getInstance();
@@ -79,13 +80,16 @@ public class MainActivity extends AppCompatActivity {
                             if(qd.getError()!=null){
                                 error = "DeviceId=" + deviceId + ", getQuestion() Error from Server, " + qd.getError();
                             } else if (qd.getCode()!=null) {
-                                if(qd.getCode().equals("EventNotStarted"))
+                                if (qd.getCode().equals("EventNotStarted")) {
                                     ((TextView) findViewById(R.id.lblQuestion)).setText("Event Not started yet.");
+                                }
+                                ((Toolbar) findViewById(R.id.toolbar)).setTitle(qd.getTeamName());
                             }else {
                                 ((TextView) findViewById(R.id.lblTimer)).setText(qd.getTime());
                                 ((TextView) findViewById(R.id.lblLevel)).setText("Level " + qd.getLevel().toString() + ":");
                                 ((TextView) findViewById(R.id.lblQuestion)).setText(qd.getQuestion());
                                 ((TextView) findViewById(R.id.lblHintText)).setText(qd.getHint());
+                                ((Toolbar) findViewById(R.id.toolbar)).setTitle(qd.getTeamName());
                             }
                         }
                         else{
@@ -114,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
                         QuestionData qd = new QuestionData();
                         if(result.containsKey("code")){
                             qd.setCode((String)result.get("code"));
+                            qd.setTeamName((String)result.get("teamName"));
                         } else if (result.containsKey("error")) {
                             qd.setError((String)result.get("error"));
                         } else {
@@ -123,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
                             qd.setMaxRank((Integer) result.get("maxRank"));
                             qd.setQuestion((String) result.get("question"));
                             qd.setHint((String) result.get("hint"));
+                            qd.setTeamName((String)result.get("teamName"));
                         }
                         return qd;
                     }
