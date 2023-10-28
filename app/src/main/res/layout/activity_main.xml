@@ -20,7 +20,7 @@
 
     <TextView
         android:id="@+id/lblTimer"
-        android:layout_width="55dp"
+        android:layout_width="wrap_content"
         android:layout_height="24dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="10dp"
@@ -51,7 +51,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="20dp"
-        android:text="Level 1"
+        android:text="Level "
         android:textAlignment="textStart"
         android:textColor="#DBE9F8"
         android:textSize="24sp"
@@ -68,7 +68,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginEnd="20dp"
         android:background="#5204364C"
-        android:text="Words Words Words Words Words Words "
+        android:text=""
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lblLevel" />
@@ -100,7 +100,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="20dp"
-        android:onClick="tempBtnClicked"
+        android:onClick="btnClickedSubmit"
         android:text="Submit"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -145,16 +145,16 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@+id/lblHint1Title"
-            app:layout_constraintTop_toTopOf="@+id/lblHint1Title">
+            app:layout_constraintBottom_toTopOf="@+id/lblHintTitle"
+            app:layout_constraintTop_toTopOf="@+id/lblHintTitle">
 
             <TextView
-                android:id="@+id/lblHint1Title"
+                android:id="@+id/lblHintTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="20dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="15dp"
-                android:text="1st Hint"
+                android:text="Hint"
                 android:textAlignment="textStart"
                 android:textColor="#DBE9F8"
                 android:textSize="16sp"
@@ -163,7 +163,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Button
-                android:id="@+id/btnUnlockHint1"
+                android:id="@+id/btnUnlockHint"
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
                 android:layout_marginTop="10dp"
@@ -175,55 +175,16 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/lblHint1Text"
+                android:id="@+id/lblHintText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginEnd="10dp"
-                android:text="ljlfakfa\nkldfjal\ndfkja\n\n\dfa\ndfafa\ndfaf\ndfa"
+                android:text=""
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/lblHint1Title" />
-
-
-            <TextView
-                android:id="@+id/lblHint2Title"
-                android:layout_width="wrap_content"
-                android:layout_height="20dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="25dp"
-                android:text="2nd Hint"
-                android:textAlignment="textStart"
-                android:textColor="#DBE9F8"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/lblHint1Text" />
-
-            <Button
-                android:id="@+id/btnUnlockHint2"
-                android:layout_width="wrap_content"
-                android:layout_height="30dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginEnd="20dp"
-                android:text="Unlock"
-                android:textSize="9sp"
-                app:icon="@android:drawable/ic_lock_idle_lock"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/lblHint1Text" />
-
-            <TextView
-                android:id="@+id/lblHint2Text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="10dp"
-                android:text="dfaf\ndfafdf\nfgadfg\ndfraf"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/lblHint2Title" />
+                app:layout_constraintTop_toBottomOf="@+id/lblHintTitle" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

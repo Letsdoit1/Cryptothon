@@ -49,9 +49,11 @@ public class Activity_welcome_screen extends AppCompatActivity {
                                         error = "FirebaseFunctionException Code = " + ((FirebaseFunctionsException) e).getCode() + ", " + e.getMessage();
                                     else
                                         error = "FirebaseFunctionException Code = " + e.getMessage();
-                                    error = "DeviceId=" + deviceId + ", " + error;
+                                    error = "DeviceId=" + deviceId + ", isRegistered(), " + error;
                                     Log.w(TAG, error);
-//                                    Toast.makeText(activityContext,error,Toast.LENGTH_LONG).show();
+                                    Intent intent = new Intent(Activity_welcome_screen.this, Activity_Error.class);
+                                    intent.putExtra("ERROR_MSG",error);
+                                    startActivity(intent);
                                     return;
                                 }
                                 isRegistered = task.getResult();
@@ -84,11 +86,6 @@ public class Activity_welcome_screen extends AppCompatActivity {
                         });
             }
         },TIME_OUT);
-
-
-
-
-
 
 
     }

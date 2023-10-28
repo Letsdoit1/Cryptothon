@@ -53,7 +53,7 @@ public class Activity_Login extends AppCompatActivity {
                                 error = "FirebaseFunctionException Code = " + ((FirebaseFunctionsException) e).getCode() + ", " + e.getMessage();
                             else
                                 error = "FirebaseFunctionException Code = " + e.getMessage();
-                            error = "DeviceId=" + deviceId + ", " + error;
+                            error = "DeviceId=" + deviceId + ", registration(), " + error;
                             Log.w(TAG, error);
                             return;
                         }
