@@ -1,7 +1,7 @@
 package com.event.cryptothon.models;
 
 public class QuestionData {
-    private String time;
+    private Integer time;
     private Integer level;
     private Integer rank;
     private Integer maxRank;
@@ -9,6 +9,23 @@ public class QuestionData {
     private String hint;
     private String teamName;
     private String code;
+    private Integer ansLength;
+
+    public Integer getAnsLength() {
+        return ansLength;
+    }
+
+    public void setAnsLength(Integer ansLength) {
+        this.ansLength = ansLength;
+    }
+
+    public Integer getTime() {
+        return time;
+    }
+
+    public void setTime(Integer time) {
+        this.time = time;
+    }
 
     public String getError() {
         return error;
@@ -26,15 +43,6 @@ public class QuestionData {
 
     public void setCode(String code) {
         this.code = code;
-    }
-
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
     }
 
     public Integer getLevel() {
