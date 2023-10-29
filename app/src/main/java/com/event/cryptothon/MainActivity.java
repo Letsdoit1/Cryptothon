@@ -7,6 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -25,6 +26,8 @@ import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.FirebaseFunctionsException;
 import com.google.firebase.functions.HttpsCallableResult;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,6 +56,11 @@ public class MainActivity extends AppCompatActivity {
         teamCode = intent.getStringExtra("TEAM_CODE");
 //        ((TextView)findViewById(R.id.txtAnswer)).setText(teamCode);
 
+        callToGetQuestion();
+
+    }
+
+    private void callToGetQuestion(){
         getQuestion()
                 .addOnCompleteListener(new OnCompleteListener<QuestionData>() {
                     @Override
@@ -110,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
-
     }
 
     private Task<QuestionData> getQuestion() {
@@ -146,7 +153,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
 
     public void btnClickedSubmit(View view) {
         String ans = ((TextView)findViewById(R.id.txtAnswer)).getText().toString();
@@ -265,8 +271,10 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
+
     private void updateUI(){
         ((TextView) findViewById(R.id.lblTimer)).setText(questionData.getTime().toString());
+        createAndShowTimer(questionData.getTime(),1000);
         ((TextView) findViewById(R.id.lblLevel)).setText("Level " + questionData.getLevel().toString() + ":");
         ((TextView) findViewById(R.id.lblQuestion)).setText(questionData.getQuestion());
         ((TextView) findViewById(R.id.txtAnswer)).setHint("Answer here with length:"+questionData.getAnsLength());
@@ -275,6 +283,25 @@ public class MainActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.lblHintText)).setText(questionData.getHint());
         ((Toolbar) findViewById(R.id.toolbar)).setTitle(questionData.getTeamName());
     }
+
+    private void createAndShowTimer(Integer countdown, Integer tick){
+        new CountDownTimer(countdown, tick) {
+            public void onTick(long millisUntilFinished) {
+                // Used for formatting digit to be in 2 digits only
+                NumberFormat f = new DecimalFormat("00");
+                long hour = (millisUntilFinished / 3600000) % 24;
+                long min = (millisUntilFinished / 60000) % 60;
+                long sec = (millisUntilFinished / 1000) % 60;
+                ((TextView)findViewById(R.id.lblTimer)).setText(f.format(hour) + ":" + f.format(min) + ":" + f.format(sec));
+            }
+            // When the task is over it will print 00:00:00 there
+            public void onFinish() {
+                ((TextView)findViewById(R.id.lblTimer)).setText("Level Time Up");
+                callToGetQuestion();
+            }
+        }.start();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
