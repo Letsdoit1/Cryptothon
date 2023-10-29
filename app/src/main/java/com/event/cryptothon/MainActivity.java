@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void btnClickedSubmit(View view) {
         String ans = ((TextView)findViewById(R.id.txtAnswer)).getText().toString();
-        if(ans != null && !ans.trim().isEmpty())
+        if(ans == null || ans.trim().isEmpty())
         {
             Toast.makeText(MainActivity.this, "Answer is empty. Enter some value.",Toast.LENGTH_SHORT).show();
             return;
@@ -179,10 +179,6 @@ public class MainActivity extends AppCompatActivity {
                                 } else if (questionData.getCode().equals("EndGame")) {
                                     title = "Game End";
                                     message = "You reached end of the game. Congratulations !!";
-                                }else if(questionData.getCode().equals("Success")||questionData.getCode().equals("TryAgain")){
-                                    Toast.makeText(MainActivity.this,"Successful !!",Toast.LENGTH_SHORT).show();
-                                }else if(questionData.getCode().equals("TryAgain")){
-                                    Toast.makeText(MainActivity.this,"Wrong Answer, Try again.",Toast.LENGTH_SHORT).show();
                                 }
                                 if(title!=null){
                                     Intent intent = new Intent(MainActivity.this, Activity_SignificantMessage.class);
@@ -191,6 +187,13 @@ public class MainActivity extends AppCompatActivity {
                                     startActivity(intent);
                                 }
                                 ((Toolbar) findViewById(R.id.toolbar)).setTitle(questionData.getTeamName());
+                            }else if(questionData.getMsg()!=null){
+                                if(questionData.getMsg().equals("Success")){
+                                    Toast.makeText(MainActivity.this,"Successful !!",Toast.LENGTH_SHORT).show();
+                                    updateUI();
+                                }else if(questionData.getMsg().equals("TryAgain")){
+                                    Toast.makeText(MainActivity.this,"Wrong Answer, Try again.",Toast.LENGTH_SHORT).show();
+                                }
                             }else {
                                 updateUI();
                             }
@@ -211,23 +214,25 @@ public class MainActivity extends AppCompatActivity {
     private Task<QuestionData> checkAnswer(String ans) {
 
         Map<String,Object> data = new HashMap<>();
+        data.put("level", questionData.getLevel());
         data.put("ans",ans);
         if(questionData.getHint()!=null)
             data.put("hintTaken", true);
         else
             data.put("hintTaken", false);
-        data.put("level", questionData.getLevel());
         data.put("teamCode", teamCode);
         data.put("deviceId",deviceId);
 
-        return mFunctions.getHttpsCallable("getQuestion")
+        return mFunctions.getHttpsCallable("checkAnswer")
                 .call(data)
                 .continueWith(new Continuation<HttpsCallableResult, QuestionData>() {
                     @Override
                     public QuestionData then(@NonNull Task<HttpsCallableResult> task) throws Exception {
                         Map<String, Object> result = (Map<String, Object>) task.getResult().getData();
                         QuestionData qd = new QuestionData();
-                        if(result.containsKey("code")){
+                        if(result.size()==0){
+                          qd.setError("No Data received from Server.");
+                        } else if(result.containsKey("code")){
                             qd.setCode((String)result.get("code"));
                             qd.setTeamName((String)result.get("teamName"));
                         } else if (result.containsKey("error")) {
@@ -239,8 +244,9 @@ public class MainActivity extends AppCompatActivity {
                             qd.setMaxRank((Integer) result.get("maxRank"));
                             qd.setQuestion((String) result.get("question"));
                             qd.setHint((String) result.get("hint"));
-                            qd.setTeamName((String)result.get("teamName"));
+                            qd.setTeamName((String) result.get("teamName"));
                             qd.setAnsLength((Integer) result.get("ansLength"));
+                            qd.setMsg((String) result.get("msg"));
                         }
                         return qd;
                     }
@@ -251,7 +257,7 @@ public class MainActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.lblTimer)).setText(questionData.getTime().toString());
         ((TextView) findViewById(R.id.lblLevel)).setText("Level " + questionData.getLevel().toString() + ":");
         ((TextView) findViewById(R.id.lblQuestion)).setText(questionData.getQuestion());
-        ((TextView) findViewById(R.id.lblQuestion)).setHint("Answer here with length:"+questionData.getAnsLength());
+        ((TextView) findViewById(R.id.txtAnswer)).setHint("Answer here with length:"+questionData.getAnsLength());
         ((TextView) findViewById(R.id.lblHintText)).setText(questionData.getHint());
         ((Toolbar) findViewById(R.id.toolbar)).setTitle(questionData.getTeamName());
     }

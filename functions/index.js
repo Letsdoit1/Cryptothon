@@ -20,8 +20,52 @@ initializeApp();
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
 
-exports.getQuestion = onCall(async (req)=>{
-  const teamCode = req.data.teamCode;
+exports.checkAnswer = onCall(async (req)=>{
+  try{
+    let level = req.data.level;
+    let ans = req.data.ans;
+    let hint = req.data.hintTaken;
+    let teamCode = req.data.teamCode;
+    let deviceId = req.data.deviceId;
+    let realAns = null;
+    var msg = "TryAgain";
+    await getDatabase().ref(`/master/questionDetails/${level}/answer`).get()
+        .then(async (ansSnapshot)=>{
+          realAns = ansSnapshot.val().toLowerCase();
+        });
+
+    if(realAns === ans.toLowerCase()){
+      logger.debug("Answer correct");
+      if(hint == true){
+        logger.debug("Hint was used in correct ans. Now updating existing record.");
+        await getDatabase().ref(`/teams/${teamCode}/scoreCard/${level}`).update({
+            isSuccess: true,
+            time: (new Date()).toISOString(),
+            deviceId: deviceID,
+          });
+      }else{
+        logger.debug("Hint was not used in correct ans. Now creating new record.");
+        await getDatabase().ref(`/teams/${teamCode}/scoreCard/${level}`).set({
+          hintUsed: false,
+          isSuccess: true,
+          time: (new Date()).toISOString(),
+          deviceId: deviceId,
+        });
+      }
+      msg = "Success";
+    }
+    logger.debug("before calling get question function.");
+    var newQuestion = await getQuestionFunction(teamCode);
+    newQuestion.msg = msg;
+    logger.debug("Updated question with Answer msg: "+JSON.stringify(newQuestion));
+    return newQuestion;
+  }catch(error) {
+    return error;
+  }
+});
+
+async function getQuestionFunction(teamCode){
+  // const teamCode = req.data.teamCode;
   let teamName = null;
   let level = 0;
   let availableTime = null;
@@ -36,15 +80,17 @@ exports.getQuestion = onCall(async (req)=>{
             logger.debug("TeamData: "+JSON.stringify(teamDataSnapshot));
             teamName = teamDataSnapshot.child("teamName").val();
             var noQuestionSolved = true;
-            if (!teamDataSnapshot.child("scorecard").exists())
+            if (!teamDataSnapshot.child("scoreCard").exists())
               noQuestionSolved = true;
             else{
               var scoreRecord;
-              teamDataSnapshot.child("scorecard")
-              .forEach((scorecardSnapshot)=> {
-                if(scorecardSnapshot.child("isSuccess").val() == true) {
+              logger.debug("Team ScoreCard: "+JSON.stringify(teamDataSnapshot));
+              teamDataSnapshot.child("scoreCard")
+              .forEach((scoreCardSnapshot)=> {
+                logger.debug("ScoreCard: key="+scoreCardSnapshot.key+", "+JSON.stringify(scoreCardSnapshot));
+                if(scoreCardSnapshot.child("isSuccess").val() == true) {
                   noQuestionSolved = false;
-                  scoreRecord = scorecardSnapshot;
+                  scoreRecord = scoreCardSnapshot;
                 }
               });
             }
@@ -84,18 +130,15 @@ exports.getQuestion = onCall(async (req)=>{
                     // logger.debug("questionReleaseInterval Data requested: "+qri);
                 });
                 // logger.debug("currentTime: "+currentTime.toLocaleString()+", qrt: "+qrt.toLocaleString());
-              let qReleasedTime = currentTime - qrt;
+              let totalQuestionReleasedInterval = currentTime - qrt;
               logger.debug("Case1: No question solved by user, \n"+
-              "\nQuestionReleasedTime: "+qReleasedTime+" || if <1 EventNotStarted");
-              if (qReleasedTime<1){
+              "\nQuestionReleasedTime: "+totalQuestionReleasedInterval+" || if <1 EventNotStarted");
+              if (totalQuestionReleasedInterval<1){
                 customCode = "EventNotStarted";
                 return ;
               }
-              // let newQRT;
-              if (qReleasedTime > qri) {
-                qReleasedTime = qReleasedTime-qri;
-                // logger.debug("Question release time needs to be updated by: "+qReleasedTime);
-                // newQRT = new Date(qrt.valueOf()+qri);
+              if (totalQuestionReleasedInterval > qri) {
+                // currentQuestionReleaseInterval = totalQuestionReleasedInterval-qri;
                 qrt = new Date(qrt.valueOf()+qri);
                 logger.debug("Updated Question Release time: "+qrt.toLocaleString());
                 await getDatabase().ref("/master/")
@@ -104,28 +147,46 @@ exports.getQuestion = onCall(async (req)=>{
               //Case 1: AvailableTime set
               availableTime = currentTime - qrt;
               //Case 1: level set
-              level = Math.floor((qrt-est)/qri);
+              // logger.debug("Updated Question released time: "+qrt.toLocaleString()+
+              // ", Event Start time: "+est.toLocaleString()+", Interval: "+(qrt-est)+
+              // "level: "+((qrt-est)/qri)+1);
+              // +1 is required otherwise initially user will be at 0 level.
+              level = Math.floor((qrt-est)/qri) + 1; 
               logger.debug("level calculated: "+level);
 
-              let noOfQuestions;
-              await getDatabase().ref("/master/questionDetails").get().then( 
-                async (questionsSnapshot)=> {
-                  // logger.debug("Getting questionsSnapshot: "+JSON.stringify(questionsSnapshot));
-                  noOfQuestions = questionsSnapshot.numChildren();
-                  // logger.debug("Number of Questions: "+noOfQuestions);
-                  //Case 1: question set
-                  question = questionsSnapshot.child(level).child("questionText").val();
-                  //Case 1: hint set
-                  hint = questionsSnapshot.child(level).child("hint").val();
-                  //Case 1: Answer length
-                  ansLength = questionsSnapshot.child(level).child("answer").val().length;
-                  logger.debug("Question at Level "+level+" = "+question+", Hint: "+hint);
-                });
-              if (noOfQuestions<level){
-                customCode = "EndGame";
-                return ;
-              }
+
+            } else {
+
             }
+            
+            let noOfQuestions;
+            await getDatabase().ref("/master/questionDetails").get().then( 
+              async (questionsSnapshot)=> {
+                // logger.debug("Getting questionsSnapshot: "+JSON.stringify(questionsSnapshot));
+                noOfQuestions = questionsSnapshot.numChildren();
+                if (noOfQuestions<level){
+                  customCode = "EndGame";
+                  return ;
+                }
+                // logger.debug("Number of Questions: "+noOfQuestions);
+                //Case 1: question set
+                question = questionsSnapshot.child(level).child("questionText").val();
+                //Case 1: hint set
+                await getDatabase().ref(`/teams/${teamCode}/scorecard`).get()
+                  .then(async (scoreCardSnapshot)=>{
+                    if(scoreCardSnapshot.exists()){
+                      await getDatabase().ref(`/team/${teamCode}/scorecard/${level}/hintUsed`).get()
+                        .then(async (hintSnapshot)=>{
+                          if(hintSnapshot.exists() && hintSnapshot.val() == true){
+                            hint = questionsSnapshot.child(level).child("hint").val();
+                          }
+                        });
+                    }
+                  });
+                //Case 1: Answer length
+                ansLength = questionsSnapshot.child(level).child("answer").val().length;
+                logger.debug("Question at Level "+level+" = "+question+", Hint: "+hint);
+              });
         });
     await getDatabase().ref(`/teams/${teamCode}`).get().then(async (snapshot)=>{
       logger.info("TeamExists: "+teamCode+", "+JSON.stringify(snapshot));
@@ -157,6 +218,10 @@ exports.getQuestion = onCall(async (req)=>{
   } catch(error) {
     return error;
   }
+}
+
+exports.getQuestion = onCall(async (req)=>{
+  return getQuestionFunction(req.data.teamCode);
 });
 
 exports.checkPwdAndRegister = onCall(async (req)=>{
