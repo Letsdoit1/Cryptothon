@@ -4,193 +4,261 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="#041c24"
+    >
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="@color/cardview_dark_background"
+        android:background="#3264a8"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:title="@string/app_name"
-        app:titleTextColor="@color/cardview_light_background" />
+        app:titleTextColor="@color/cardview_light_background">
 
-    <TextView
-        android:id="@+id/lblTimer"
-        android:layout_width="wrap_content"
-        android:layout_height="24dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
-        android:text="00:00:00"
-        android:textColor="#FFEB3B"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.948"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            >
 
-    <ImageView
-        android:id="@+id/imgLogo"
-        android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="50dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lblTimer"
-        app:srcCompat="@drawable/cryptothon_text_withoutbackground" />
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerInParent="true"
+                android:fontFamily="@font/gagalin"
+                android:text="Crypto-thon"
+                android:textColor="#FFFFFF"
+                android:textSize="25dp" />
 
-    <TextView
-        android:id="@+id/lblLevel"
-        android:layout_width="0dp"
+
+            <ImageView
+                android:id="@+id/icon"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerInParent="true"
+                android:layout_marginRight="10dp"
+                android:clickable="true"
+
+                android:foreground="?attr/selectableItemBackground"
+                android:src="@drawable/scoreboard" />
+        </RelativeLayout>
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <RelativeLayout
+        android:id="@+id/form"
+        android:layout_width="350dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="20dp"
-        android:text="Level "
-        android:textAlignment="textStart"
-        android:textColor="#DBE9F8"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center"
+        android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@+id/hintUI"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imgLogo" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
-    <TextView
-        android:id="@+id/lblQuestion"
-        android:layout_width="0dp"
-        android:layout_height="120dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="20dp"
-        android:background="#5204364C"
-        android:text=""
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lblLevel" />
+        <!--        <com.google.android.material.textfield.TextInputLayout-->
+        <!--            android:id="@+id/timer"-->
+        <!--            android:layout_width="150dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_toEndOf="@id/teamname"-->
+        <!--            android:hint="Timer"-->
+        <!--            android:layout_marginLeft="50px"-->
+        <!--            >-->
 
-    <EditText
-        android:id="@+id/txtAnswer"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="100dp"
-        android:ems="10"
-        android:hint="Type xx characters here"
-        android:inputType="text"
-        android:textColor="@color/white"
-        android:textColorHint="#C63E75B8"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lblQuestion"
-        app:layout_constraintVertical_bias="0.0" />
+        <!--            <com.google.android.material.textfield.TextInputEditText-->
+        <!--                android:layout_width="150dp"-->
+        <!--                android:layout_height="wrap_content" />-->
 
-    <Button
-        android:id="@+id/btnSubmit"
-        style="material button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="20dp"
-        android:onClick="btnClickedSubmit"
-        android:text="Submit"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtAnswer" />
+        <!--        </com.google.android.material.textfield.TextInputLayout>-->
 
-    <View
-        android:id="@+id/divider"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginTop="45dp"
-        android:layout_marginBottom="5dp"
-        android:background="#F1C7C7"
-        app:layout_constraintBottom_toTopOf="@+id/lytHintScrollView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnSubmit"
-        app:layout_constraintVertical_bias="0.32999998" />
-    <TextView
-        android:id="@+id/lblUnlockSectionTitle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="1dp"
-        android:background="#54E86868"
-        android:text="Unlock hints using (-1/4) times point of current level (each)"
-        android:textAlignment="center"
-        android:textColor="#FBF8F7"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider" />
+        <TextView
+            android:id="@+id/lblTimer"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/teamname"
+            android:text="00:00:00"
+            android:fontFamily="@font/font1"
+            android:gravity="right"
 
-    <ScrollView
-        android:id="@+id/lytHintScrollView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lblUnlockSectionTitle">
+            />
 
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <TextView
+            android:id="@+id/teamname"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="SE team"
+            android:gravity="center"
+            android:fontFamily="@font/gagalin"
+            android:textColor="#ED3237"
+            android:textSize="25dp"
+
+            />
+
+
+        <!--        <com.google.android.material.textfield.TextInputLayout-->
+        <!--            android:id="@+id/teamname"-->
+        <!--            android:layout_width="150dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            >-->
+
+        <!--            <com.google.android.material.textfield.TextInputEditText-->
+
+        <!--                android:id="@+id/teamnameText"-->
+        <!--                android:layout_width="match_parent"-->
+        <!--                android:layout_height="wrap_content"-->
+        <!--                android:enabled="false"-->
+        <!--                android:focusable="false"-->
+        <!--                android:textColor="#FFFFFF" />-->
+
+        <!--        </com.google.android.material.textfield.TextInputLayout>-->
+
+        <TextView
+            android:id="@+id/lblLevel"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Level "
+            android:gravity="center"
+            android:layout_below="@id/teamname"
+            android:fontFamily="@font/gagalin"
+            android:textColor="#F9E830"
+            android:textSize="25dp"
+
+            />
+
+        <!--        <com.google.android.material.textfield.TextInputLayout-->
+        <!--            android:id="@+id/ranking"-->
+        <!--            android:layout_width="150dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_below="@id/teamname"-->
+        <!--            android:hint="Ranking"-->
+        <!--            app:hintTextColor="#FFFFFF"-->
+        <!--            >-->
+
+        <!--            <com.google.android.material.textfield.TextInputEditText-->
+        <!--                android:id="@+id/rankingText"-->
+        <!--                android:layout_width="match_parent"-->
+        <!--                android:layout_height="wrap_content"-->
+        <!--                android:enabled="false"-->
+        <!--                android:focusable="false"-->
+        <!--                android:textColor="#FFFFFF" />-->
+
+        <!--        </com.google.android.material.textfield.TextInputLayout>-->
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/question"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@+id/lblHintTitle"
-            app:layout_constraintTop_toTopOf="@+id/lblHintTitle">
+            android:layout_below="@id/lblLevel"
+            android:layout_marginTop="50px"
+            android:layout_marginBottom="50px"
+            android:fontFamily="@font/font1"
+            android:hint="Question">
 
-            <TextView
-                android:id="@+id/lblHintTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="20dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="15dp"
-                android:text="Hint"
-                android:textAlignment="textStart"
-                android:textColor="#DBE9F8"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/lblQuestion"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:enabled="false"
+                android:focusable="false"
+                android:textColor="#000" />
 
-            <Button
-                android:id="@+id/btnUnlockHint"
-                android:layout_width="wrap_content"
-                android:layout_height="30dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="20dp"
-                android:onClick="btnUnlockHint"
-                android:text="Unlock"
-                android:textSize="9sp"
-                app:icon="@android:drawable/ic_lock_idle_lock"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-            <TextView
-                android:id="@+id/lblHintText"
-                android:layout_width="0dp"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/lytAnswer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/question"
+            android:hint="Answer"
+            app:counterEnabled="true"
+            app:counterMaxLength="10"
+            app:endIconMode="clear_text"
+
+            >
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/txtAnswer"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="10dp"
-                android:text=""
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/lblHintTitle" />
+                android:inputType="text"
+                android:textColor="#000"
+                android:fontFamily="@font/font1"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
+        <Button
+            android:id="@+id/btnSubmit"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/lytAnswer"
+            android:onClick="btnClickedSubmit"
+            android:text="Submit"
+            android:fontFamily="@font/font1"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#7aeb34"
+            app:rippleColor="#000000" />
 
+
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/hintUI"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_marginTop="15px"
+        android:background="#99000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/form"
+        app:layout_constraintVertical_bias="1.0">
+
+        <Button
+            android:id="@+id/btnUnlockHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:onClick="btnUnlockHint"
+            android:text="Need Help?"
+            app:backgroundTint="#4287f5" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/hint"
+            android:fontFamily="@font/font1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="hint"
+            android:visibility="gone"
+            android:layout_centerInParent="true"
+            android:layout_margin="50px"
+
+            >
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/lblHintText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:focusable="false"
+                android:fontFamily="@font/font1"
+                android:textColor="#FFFFFF"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
+    </RelativeLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

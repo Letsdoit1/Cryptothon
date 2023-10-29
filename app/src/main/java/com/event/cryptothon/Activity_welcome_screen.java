@@ -9,6 +9,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.event.cryptothon.models.RegistrationStatus;
 import com.google.android.gms.tasks.Continuation;
@@ -25,6 +29,8 @@ public class Activity_welcome_screen extends AppCompatActivity {
     private static final String TAG = "Activity_welcome_screen";
     public static final int TIME_OUT = 1000;
     private FirebaseFunctions mFunctions;
+    ImageView logo;
+    TextView textLogo;
 
     @Override
     protected void onResume() {
@@ -101,6 +107,15 @@ public class Activity_welcome_screen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome_screen);
+        logo = (ImageView) findViewById(R.id.logo_id);
+        textLogo = (TextView) findViewById(R.id.text_id);
+
+        Animation logoanimation = AnimationUtils.loadAnimation(this,R.anim.mysplashanimation);
+        logo.startAnimation(logoanimation);
+
+        Animation textanimation = AnimationUtils.loadAnimation(this,R.anim.splash_animation_text);
+        textLogo.startAnimation(textanimation);
+
 
     }
 }

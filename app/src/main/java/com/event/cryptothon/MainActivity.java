@@ -5,14 +5,16 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +24,8 @@ import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.FirebaseFunctionsException;
 import com.google.firebase.functions.HttpsCallableResult;
@@ -34,22 +38,26 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "CryptothonMainActivity";
     FirebaseFunctions mFunctions;
-
     String deviceId;
-
     QuestionData questionData;
-
     String teamCode;
-
     String hint;
-
+    AlertDialog.Builder builder;
+    private Button btnUnlockHint;
+    private TextInputLayout hintBox;
+    private RelativeLayout hintUI;
+    private TextInputEditText hintText;
     @Override
     protected void onResume() {
         super.onResume();
 
         if(hint!=null) {
-            ((Button) findViewById(R.id.btnUnlockHint)).setEnabled(false);
-            ((TextView) findViewById(R.id.lblHintText)).setText(hint);
+//            ((Button) findViewById(R.id.btnUnlockHint)).setEnabled(false);
+//            ((TextView) findViewById(R.id.lblHintText)).setText(hint);
+            btnUnlockHint.setVisibility(View.GONE);
+            hintUI.setBackgroundColor(Color.rgb(52, 165, 235));
+            hintBox.setVisibility(View.VISIBLE);
+            hintText.setText(hint);
         }
 
         Intent intent = getIntent();
@@ -277,9 +285,15 @@ public class MainActivity extends AppCompatActivity {
         createAndShowTimer(questionData.getTime(),1000);
         ((TextView) findViewById(R.id.lblLevel)).setText("Level " + questionData.getLevel().toString() + ":");
         ((TextView) findViewById(R.id.lblQuestion)).setText(questionData.getQuestion());
-        ((TextView) findViewById(R.id.txtAnswer)).setHint("Answer here with length:"+questionData.getAnsLength());
-        if(hint!=null)
-            ((Button) findViewById(R.id.btnUnlockHint)).setEnabled(false);
+//        ((TextView) findViewById(R.id.txtAnswer)).setHint("Answer here with length:"+questionData.getAnsLength());
+        ((TextInputLayout) findViewById(R.id.lytAnswer)).setCounterMaxLength(questionData.getAnsLength());
+        if(hint!=null) {
+//            ((Button) findViewById(R.id.btnUnlockHint)).setEnabled(false);
+            btnUnlockHint.setVisibility(View.GONE);
+            hintUI.setBackgroundColor(Color.rgb(52, 165, 235));
+            hintBox.setVisibility(View.VISIBLE);
+            hintText.setText(hint);
+        }
         ((TextView) findViewById(R.id.lblHintText)).setText(questionData.getHint());
         ((Toolbar) findViewById(R.id.toolbar)).setTitle(questionData.getTeamName());
     }
@@ -314,27 +328,56 @@ public class MainActivity extends AppCompatActivity {
             mFunctions.useEmulator("10.0.2.2",5001);
 
         deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        hintBox=findViewById(R.id.hint);
+
+        hintUI=findViewById(R.id.hintUI);
+
+        hintText=findViewById(R.id.lblHintText);
+        btnUnlockHint=findViewById(R.id.btnUnlockHint);
     }
 
     public void btnUnlockHint(View view) {
-        // Create an alert builder
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Taking Hint");
 
-        // set the custom layout
-        final View customLayout = getLayoutInflater().inflate(R.layout.alert_dialog, null);
-        builder.setView(customLayout);
+            builder=new AlertDialog.Builder(MainActivity.this);
 
-        // add a button
-        builder.setPositiveButton("Yes", (dialog, which) -> {
-            sendDialogDataToActivity("Yes");
-        });
-        builder.setNegativeButton("No", (dialog, which) -> {
-            sendDialogDataToActivity("No");
-        });
-        // create and show the alert dialog
-        AlertDialog dialog = builder.create();
-        dialog.show();
+            builder.setTitle("Help")
+                    .setMessage("Unlock hint?")
+                    .setCancelable(true)
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int i) {
+                            dialog.cancel();
+                            sendDialogDataToActivity("No");
+                        }
+                    })
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int i) {
+                            dialog.cancel();
+                            sendDialogDataToActivity("Yes");
+                        }
+                    })
+                    .show();
+
+//        // Create an alert builder
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder.setTitle("Taking Hint");
+//
+//        // set the custom layout
+//        final View customLayout = getLayoutInflater().inflate(R.layout.alert_dialog, null);
+//        builder.setView(customLayout);
+//
+//        // add a button
+//        builder.setPositiveButton("Yes", (dialog, which) -> {
+//            sendDialogDataToActivity("Yes");
+//        });
+//        builder.setNegativeButton("No", (dialog, which) -> {
+//            sendDialogDataToActivity("No");
+//        });
+//        // create and show the alert dialog
+//        AlertDialog dialog = builder.create();
+//        dialog.show();
     }
     private void sendDialogDataToActivity(String data) {
         if(data.equals("No"))
@@ -368,8 +411,12 @@ public class MainActivity extends AppCompatActivity {
                             startActivity(intent);
                         }else {
                             hint = hintMsg;
-                            ((Button) findViewById(R.id.btnUnlockHint)).setEnabled(false);
-                            ((TextView) findViewById(R.id.lblHintText)).setText(hint);
+//                            ((Button) findViewById(R.id.btnUnlockHint)).setEnabled(false);
+//                            ((TextView) findViewById(R.id.lblHintText)).setText(hint);
+                            btnUnlockHint.setVisibility(View.GONE);
+                            hintUI.setBackgroundColor(Color.rgb(52, 165, 235));
+                            hintBox.setVisibility(View.VISIBLE);
+                            hintText.setText(hint);
                         }
                     }
                 });
