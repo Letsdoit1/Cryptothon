@@ -1,6 +1,7 @@
 package com.event.cryptothon;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -9,6 +10,8 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,9 +38,16 @@ public class MainActivity extends AppCompatActivity {
 
     String teamCode;
 
+    String hint;
+
     @Override
     protected void onResume() {
         super.onResume();
+
+        if(hint!=null) {
+            ((Button) findViewById(R.id.btnUnlockHint)).setEnabled(false);
+            ((TextView) findViewById(R.id.lblHintText)).setText(hint);
+        }
 
         Intent intent = getIntent();
         teamCode = intent.getStringExtra("TEAM_CODE");
@@ -92,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
                         else{
                             error = "DeviceId=" + deviceId + ", getQuestion(), " + "Question Data not received.";
                         }
-
                         if(error!=null){
                             Log.w(TAG, error);
                             Intent intent = new Intent(MainActivity.this, Activity_Error.class);
@@ -114,7 +123,9 @@ public class MainActivity extends AppCompatActivity {
                     public QuestionData then(@NonNull Task<HttpsCallableResult> task) throws Exception {
                         Map<String, Object> result = (Map<String, Object>) task.getResult().getData();
                         QuestionData qd = new QuestionData();
-                        if(result.containsKey("code")){
+                        if(result.size()==0){
+                            qd.setError("No Data received from Server.");
+                        }else if(result.containsKey("code")){
                             qd.setCode((String)result.get("code"));
                             qd.setTeamName((String)result.get("teamName"));
                         } else if (result.containsKey("error")) {
@@ -126,6 +137,8 @@ public class MainActivity extends AppCompatActivity {
                             qd.setMaxRank((Integer) result.get("maxRank"));
                             qd.setQuestion((String) result.get("question"));
                             qd.setHint((String) result.get("hint"));
+                            if(qd.getHint()!=null)
+                                hint = qd.getHint();
                             qd.setTeamName((String)result.get("teamName"));
                             qd.setAnsLength((Integer) result.get("ansLength"));
                         }
@@ -252,16 +265,16 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
     private void updateUI(){
         ((TextView) findViewById(R.id.lblTimer)).setText(questionData.getTime().toString());
         ((TextView) findViewById(R.id.lblLevel)).setText("Level " + questionData.getLevel().toString() + ":");
         ((TextView) findViewById(R.id.lblQuestion)).setText(questionData.getQuestion());
         ((TextView) findViewById(R.id.txtAnswer)).setHint("Answer here with length:"+questionData.getAnsLength());
+        if(hint!=null)
+            ((Button) findViewById(R.id.btnUnlockHint)).setEnabled(false);
         ((TextView) findViewById(R.id.lblHintText)).setText(questionData.getHint());
         ((Toolbar) findViewById(R.id.toolbar)).setTitle(questionData.getTeamName());
     }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -276,4 +289,83 @@ public class MainActivity extends AppCompatActivity {
         deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 
+    public void btnUnlockHint(View view) {
+        // Create an alert builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Taking Hint");
+
+        // set the custom layout
+        final View customLayout = getLayoutInflater().inflate(R.layout.alert_dialog, null);
+        builder.setView(customLayout);
+
+        // add a button
+        builder.setPositiveButton("Yes", (dialog, which) -> {
+            sendDialogDataToActivity("Yes");
+        });
+        builder.setNegativeButton("No", (dialog, which) -> {
+            sendDialogDataToActivity("No");
+        });
+        // create and show the alert dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+    private void sendDialogDataToActivity(String data) {
+        if(data.equals("No"))
+            return;
+        unlockHint()
+                .addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Exception e = task.getException();
+                            String error = null;
+                            if (e instanceof FirebaseFunctionsException)
+                                error = "FirebaseFunctionException Code = " + ((FirebaseFunctionsException) e).getCode() + ", " + e.getMessage();
+                            else
+                                error = "FirebaseFunctionException Code = " + e.getMessage();
+                            error = "DeviceId=" + deviceId + ", unlockHint(), " + error;
+                            Log.w(TAG, error);
+                            Intent intent = new Intent(MainActivity.this, Activity_Error.class);
+                            intent.putExtra("ERROR_MSG",error);
+                            startActivity(intent);
+                            return;
+                        }
+
+                        String hintMsg = task.getResult();
+
+                        if(hintMsg.equals("<<Error>>") || hintMsg==null){
+                            String error = "DeviceId=" + deviceId + ", unlockHint(), " + "Error getting hint while unlocking.";
+                            Log.w(TAG, error);
+                            Intent intent = new Intent(MainActivity.this, Activity_Error.class);
+                            intent.putExtra("ERROR_MSG",error);
+                            startActivity(intent);
+                        }else {
+                            hint = hintMsg;
+                            ((Button) findViewById(R.id.btnUnlockHint)).setEnabled(false);
+                            ((TextView) findViewById(R.id.lblHintText)).setText(hint);
+                        }
+                    }
+                });
+    }
+
+    private Task<String> unlockHint() {
+
+        Map<String,Object> data = new HashMap<>();
+        data.put("level", questionData.getLevel());
+        data.put("teamCode", teamCode);
+        data.put("deviceId", deviceId);
+
+        return mFunctions.getHttpsCallable("unlockHint")
+                .call(data)
+                .continueWith(new Continuation<HttpsCallableResult, String>() {
+                    @Override
+                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                        Map<String, Object> result = (Map<String, Object>) task.getResult().getData();
+                        if(result.containsKey("hint"))
+                            return (String)(result.get("hint"));
+                        else
+                            return "<<Error>>";
+                    }
+                });
+    }
 }

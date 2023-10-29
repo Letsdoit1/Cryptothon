@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
+    android:theme="@style/Theme.Material3.Dark.Dialog">
+
+    <TextView
+        android:id="@+id/lblHintAlertMsg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="It will deduct 1/4 times of current level score of your team.\n\nAre you sure want to use hint?"
+        android:textSize="16sp" />
+
+</LinearLayout>

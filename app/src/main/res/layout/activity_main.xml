@@ -168,6 +168,7 @@
                 android:layout_height="30dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="20dp"
+                android:onClick="btnUnlockHint"
                 android:text="Unlock"
                 android:textSize="9sp"
                 app:icon="@android:drawable/ic_lock_idle_lock"
