@@ -28,6 +28,10 @@ public class Activity_Login extends AppCompatActivity {
     public static final String TAG = "Activity_Login";
     private FirebaseFunctions mFunctions;
 
+    private String deviceId;
+
+    String errorRecieved;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,12 +40,14 @@ public class Activity_Login extends AppCompatActivity {
         if (FirebaseHelper.EMULATOR_RUNNING)
             mFunctions.useEmulator("10.0.2.2", 5001);
 
-
+        deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 
     public void onClickedLoginBtn(View view) {
-        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
         String pwd = ((TextView)findViewById(R.id.txtPwd)).getText().toString();
+        if(pwd==null || pwd.isEmpty()) {
+            Toast.makeText(Activity_Login.this,"Empty, Please enter shared password to continue.",Toast.LENGTH_SHORT);
+        }
         checkPwdAndRegister(deviceId, pwd)
                 .addOnCompleteListener(new OnCompleteListener<RegistrationDetails>() {
                     @Override
@@ -55,6 +61,10 @@ public class Activity_Login extends AppCompatActivity {
                                 error = "FirebaseFunctionException Code = " + e.getMessage();
                             error = "DeviceId=" + deviceId + ", registration(), " + error;
                             Log.w(TAG, error);
+                            Intent intent = new Intent(Activity_Login.this, Activity_Error.class);
+                            intent.putExtra("ERROR_MSG",error);
+                            startActivity(intent);
+                            finish();
                             return;
                         }
                         RegistrationDetails rd = task.getResult();
@@ -64,6 +74,12 @@ public class Activity_Login extends AppCompatActivity {
                             Intent intent = new Intent(Activity_Login.this, MainActivity.class);
                             intent.putExtra("TEAM_CODE",pwd);
                             startActivity(intent);
+                            finish();
+                        }else if (rd == null){
+                            Intent intent = new Intent(Activity_Login.this, Activity_Error.class);
+                            intent.putExtra("ERROR_MSG",errorRecieved);
+                            startActivity(intent);
+                            finish();
                         }else{
                             Toast.makeText(Activity_Login.this,
                                     getString(R.string.max_devices_reached)+getString(R.string.device)+"1: "+rd.getDeviceId1()+", "+
@@ -84,6 +100,13 @@ public class Activity_Login extends AppCompatActivity {
                     @Override
                     public RegistrationDetails then(@NonNull Task<HttpsCallableResult> task) throws Exception {
                         Map<String, Object> result = (Map<String, Object>) task.getResult().getData();
+                        if(result==null ) {
+                            errorRecieved = "checkPwdAndRegister(): null result received from Server";
+                            return null;
+                        }else if(result.containsKey("error")){
+                            errorRecieved = "checkPwdAndRegister(): Error Recieved: "+result.get("error").toString();
+                            return null;
+                        }
                         RegistrationDetails rd = new RegistrationDetails();
                         rd.setWrongTeamCode((boolean)result.get("wrongTeamCode"));
                         rd.setRegisteredSuccessfully((boolean)result.get("registeredSuccessfully"));
@@ -96,4 +119,7 @@ public class Activity_Login extends AppCompatActivity {
     }
 
 
+    public void lblLogoClickShowDeviceId(View view) {
+        Toast.makeText(Activity_Login.this,"DeviceId: "+deviceId,Toast.LENGTH_LONG).show();
+    }
 }

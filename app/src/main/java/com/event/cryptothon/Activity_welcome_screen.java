@@ -71,6 +71,7 @@ public class Activity_welcome_screen extends AppCompatActivity {
                             Intent intent = new Intent(Activity_welcome_screen.this, Activity_Error.class);
                             intent.putExtra("ERROR_MSG",error);
                             startActivity(intent);
+                            finish();
                             return;
                         }
                         RegistrationStatus isRegistered = null;
@@ -79,9 +80,12 @@ public class Activity_welcome_screen extends AppCompatActivity {
                             Intent intent = new Intent(Activity_welcome_screen.this, MainActivity.class);
                             intent.putExtra("TEAM_CODE",isRegistered.getTeamPassword());
                             startActivity(intent);
+                            finish();
                         }
-                        else
+                        else {
                             startActivity(new Intent(Activity_welcome_screen.this, Activity_Login.class));
+                            finish();
+                        }
                     }
                 });
     }

@@ -101,6 +101,8 @@ async function getQuestionFunction(teamCode){
     var lastSolvedQuestionNumber = 0;
     var lastSolvedQuestionTime = null;
     let currentTime = new Date();
+    logger.debug("Just after try block team Code: "+teamCode);
+    // To check if user previously solved any question or not if yes then which was the last question solved
     await getDatabase().ref(`/teams/${teamCode}`).get()
         .then(async (teamDataSnapshot)=> {
             logger.debug("TeamData: "+JSON.stringify(teamDataSnapshot));
@@ -114,9 +116,9 @@ async function getQuestionFunction(teamCode){
               teamDataSnapshot.child("scoreCard")
               .forEach((scoreCardSnapshot)=> {
                 logger.debug("ScoreCard: key="+scoreCardSnapshot.key+", "+JSON.stringify(scoreCardSnapshot));
-                if(scoreCardSnapshot.key>lastSolvedQuestionNumber && scoreCardSnapshot.child("isSuccess").val() == true){
+                if(Number(scoreCardSnapshot.key)>lastSolvedQuestionNumber && scoreCardSnapshot.child("isSuccess").val() == true){
                   noQuestionSolved = false;
-                  lastSolvedQuestionNumber = scoreCardSnapshot.key;
+                  lastSolvedQuestionNumber = Number(scoreCardSnapshot.key);
                   lastSolvedQuestionTime = new Date(scoreCardSnapshot.child("time").val());
                 }
               });
@@ -129,6 +131,7 @@ async function getQuestionFunction(teamCode){
         //converted to MilliSeconds
         // logger.debug("questionReleaseInterval Data requested: "+qri);
       });
+    logger.debug("Before starting case 1 & 2 team Code: "+teamCode);
     //Case1: No question solved by user
     if (noQuestionSolved) {
       // logger.debug("case1: noQuestionSolved yet");
@@ -142,7 +145,11 @@ async function getQuestionFunction(teamCode){
         });
       if((currentTime-eet)>=0){
         customCode = "EventEnded";
-        return ;
+        logger.debug("Event Ended");
+        return {
+          code: customCode,
+          teamName: teamName
+        };
       }
       await getDatabase().ref("/master/eventStartTime").get()
       .then( async (estSnapshot)=> {
@@ -162,7 +169,11 @@ async function getQuestionFunction(teamCode){
       "\nQuestionReleasedTime: "+totalQuestionReleasedInterval+" || if <1 EventNotStarted");
       if (totalQuestionReleasedInterval<1){
         customCode = "EventNotStarted";
-        return ;
+        logger.debug("Event Not Started");
+        return {
+          code: customCode,
+          teamName: teamName
+        };
       }
       if (totalQuestionReleasedInterval > qri) {
         // currentQuestionReleaseInterval = totalQuestionReleasedInterval-qri;
@@ -172,7 +183,7 @@ async function getQuestionFunction(teamCode){
             .update({questionReleaseTime:qrt});
       }
       //Case 1: AvailableTime set
-      availableTime = currentTime - qrt;
+      availableTime = (new Date(qrt.valueOf()+qri))-currentTime;
       //Case 1: level set
       level = Math.floor((qrt-est)/qri) + 1; 
       logger.debug("level calculated: "+level);
@@ -188,6 +199,8 @@ async function getQuestionFunction(teamCode){
       level = Number(lastSolvedQuestionNumber) + Number(Math.floor((currentTime - lastSolvedQuestionTime)/qri)) + Number(1);
       logger.debug("availableTime: "+availableTime+", "+level);
     }
+
+    logger.debug("After case 1 & 2 team Code: "+teamCode);
     
     let noOfQuestions;
     await getDatabase().ref("/master/questionDetails").get().then( 
@@ -196,7 +209,11 @@ async function getQuestionFunction(teamCode){
         noOfQuestions = questionsSnapshot.numChildren();
         if (noOfQuestions<level){
           customCode = "EndGame";
-          return ;
+          logger.debug("End Game, user finished the game.");
+          return {
+            code: customCode,
+            teamName: teamName
+          };
         }
         // logger.debug("Number of Questions: "+noOfQuestions);
         //Case 1: question set
@@ -221,9 +238,9 @@ async function getQuestionFunction(teamCode){
         ansLength = questionsSnapshot.child(level).child("answer").val().length;
         logger.debug("Question at Level "+level+" = "+question+", Hint: "+hint);
       });
-
+    logger.debug("Before getting team name team Code: "+teamCode);
     await getDatabase().ref(`/teams/${teamCode}`).get().then(async (snapshot)=>{
-      logger.info("TeamExists: "+teamCode+", "+JSON.stringify(snapshot));
+      // logger.info("TeamExists: "+teamCode+", "+JSON.stringify(snapshot));
       teamName = snapshot.child("teamName").val();
     });
     logger.debug("Check for custom code: "+customCode+", team name: "+teamName);
@@ -260,63 +277,73 @@ exports.getQuestion = onCall(async (req)=>{
 });
 
 exports.checkPwdAndRegister = onCall(async (req)=>{
-  const teamCode = req.data.teamCode;
-  const deviceId = req.data.deviceId;
-  let wrongTeamCode = false;
-  let registeredSuccessfully = false;
-  let device1 = null;
-  let device2 = null;
-  let device3 = null;
-  logger.info("checkPwdAndRegister Call");
-  await getDatabase().ref(`/teams/${teamCode}`).get().then(async (snapshot)=>{
-    logger.info("TeamExists: "+teamCode+", "+JSON.stringify(snapshot));
-    if (snapshot.exists()) {
-      const registeredDevicesList = snapshot.child("registeredDevices");
-      if (!registeredDevicesList.exists()) {
-        getDatabase().ref(`/teams/${teamCode}/registeredDevices`)
-            .set({Device1: deviceId}).then((snapshot)=>{
-              getDatabase().ref("/devices/").set({[deviceId]: teamCode});
-            });
-        registeredSuccessfully = true;
+  try{
+    const teamCode = req.data.teamCode;
+    const deviceId = req.data.deviceId;
+    let wrongTeamCode = false;
+    let registeredSuccessfully = false;
+    let device1;
+    let device2;
+    let device3;
+    logger.info("checkPwdAndRegister Call: teamCode: "+teamCode+", deviceId: "+ deviceId);
+    await getDatabase().ref(`/teams/${teamCode}`).get().then(async (snapshot)=>{
+      logger.info("TeamExists: "+teamCode+", "+JSON.stringify(snapshot));
+      if (snapshot.exists()) {
+        const registeredDevicesList = snapshot.child("registeredDevices");
+        if (!registeredDevicesList.exists()) {
+          getDatabase().ref(`/teams/${teamCode}/registeredDevices`)
+              .set({Device1: deviceId}).then((snapshot)=>{
+                getDatabase().ref("/devices/").update({[deviceId]: teamCode});
+              });
+          registeredSuccessfully = true;
+          return;
+        }
+        device1 = registeredDevicesList.child("Device1").val();
+        if (!device1) {
+          getDatabase().ref(`/teams/${teamCode}/registeredDevices`)
+              .update({Device1: deviceId});
+          getDatabase().ref("/devices/").update({[deviceId]: teamCode});
+          registeredSuccessfully = true;
+          return;
+        }
+        device2 = registeredDevicesList.child("Device2").val();
+        if (!device2) {
+          getDatabase().ref(`/teams/${teamCode}/registeredDevices`)
+              .update({Device2: deviceId});
+          getDatabase().ref("/devices/").update({[deviceId]: teamCode});
+          registeredSuccessfully = true;
+          return;
+        }
+        device3 = registeredDevicesList.child("Device3").val();
+        if (!device3) {
+          getDatabase().ref(`/teams/${teamCode}/registeredDevices`)
+              .update({Device3: deviceId});
+          getDatabase().ref("/devices/").update({[deviceId]: teamCode});
+          registeredSuccessfully = true;
+          return;
+        }
+      } else {
+        wrongTeamCode = true;
         return;
       }
-      device1 = registeredDevicesList.child("Device1").val();
-      if (!device1.exists() || device1 === "null") {
-        getDatabase().ref(`/teams/${teamCode}/registeredDevices`)
-            .update({Device1: deviceId});
-        getDatabase().ref("/devices/").set({[deviceId]: teamCode});
-        registeredSuccessfully = true;
-        return;
-      }
-      device2 = registeredDevicesList.child("Device2").val();
-      if (!device2.exists() || device2 === "null") {
-        getDatabase().ref(`/teams/${teamCode}/registeredDevices`)
-            .update({Device2: deviceId});
-        getDatabase().ref("/devices/").set({[deviceId]: teamCode});
-        registeredSuccessfully = true;
-        return;
-      }
-      device3 = registeredDevicesList.child("Device3").val();
-      if (!device3.exists() || device3 === "null") {
-        getDatabase().ref(`/teams/${teamCode}/registeredDevices`)
-            .update({Device3: deviceId});
-        getDatabase().ref("/devices/").set({[deviceId]: teamCode});
-        registeredSuccessfully = true;
-        return;
-      }
-    } else {
-      wrongTeamCode = true;
-      return;
-    }
-  });
+    });
 
-  return {
-    wrongTeamCode: wrongTeamCode,
-    registeredSuccessfully: registeredSuccessfully,
-    deviceId1: device1,
-    deviceId2: device2,
-    deviceId3: device3,
-  };
+    const returnObject = {
+      wrongTeamCode: wrongTeamCode,
+      registeredSuccessfully: registeredSuccessfully,
+      deviceId1: device1,
+      deviceId2: device2,
+      deviceId3: device3,
+    };
+
+    logger.info("Return Object: "+JSON.stringify(returnObject));
+
+    return returnObject;
+  }catch(error){
+    return {
+      error: error,
+    }
+  }
 });
 
 exports.isRegisteredDevice = onCall(async (req) => {

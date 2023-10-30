@@ -7,7 +7,11 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 public class Activity_SignificantMessage extends AppCompatActivity {
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finishAffinity();
+    }
     @Override
     protected void onResume() {
         super.onResume();

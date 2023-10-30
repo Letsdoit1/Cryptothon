@@ -7,7 +7,11 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 public class Activity_Error extends AppCompatActivity {
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finishAffinity();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

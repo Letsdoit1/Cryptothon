@@ -47,6 +47,14 @@ public class MainActivity extends AppCompatActivity {
     private TextInputLayout hintBox;
     private RelativeLayout hintUI;
     private TextInputEditText hintText;
+
+    CountDownTimer mCounter;
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finishAffinity();
+    }
     @Override
     protected void onResume() {
         super.onResume();
@@ -67,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
         callToGetQuestion();
 
     }
-
     private void callToGetQuestion(){
         getQuestion()
                 .addOnCompleteListener(new OnCompleteListener<QuestionData>() {
@@ -127,7 +134,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
     private Task<QuestionData> getQuestion() {
         Map<String,Object> data = new HashMap<>();
         data.put("teamCode", teamCode);
@@ -138,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
                     public QuestionData then(@NonNull Task<HttpsCallableResult> task) throws Exception {
                         Map<String, Object> result = (Map<String, Object>) task.getResult().getData();
                         QuestionData qd = new QuestionData();
-                        if(result.size()==0){
+                        if(result == null || result.size()==0){
                             qd.setError("No Data received from Server.");
                         }else if(result.containsKey("code")){
                             qd.setCode((String)result.get("code"));
@@ -161,7 +167,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
     public void btnClickedSubmit(View view) {
         String ans = ((TextView)findViewById(R.id.txtAnswer)).getText().toString();
         if(ans == null || ans.trim().isEmpty())
@@ -237,7 +242,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
     private Task<QuestionData> checkAnswer(String ans) {
 
         Map<String,Object> data = new HashMap<>();
@@ -257,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
                     public QuestionData then(@NonNull Task<HttpsCallableResult> task) throws Exception {
                         Map<String, Object> result = (Map<String, Object>) task.getResult().getData();
                         QuestionData qd = new QuestionData();
-                        if(result.size()==0){
+                        if(result == null || result.size()==0){
                           qd.setError("No Data received from Server.");
                         } else if(result.containsKey("code")){
                             qd.setCode((String)result.get("code"));
@@ -279,12 +283,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
     private void updateUI(){
         ((TextView) findViewById(R.id.lblTimer)).setText(questionData.getTime().toString());
         createAndShowTimer(questionData.getTime(),1000);
-        ((TextView) findViewById(R.id.lblLevel)).setText("Level " + questionData.getLevel().toString() + ":");
-        ((TextView) findViewById(R.id.lblQuestion)).setText(questionData.getQuestion());
+        ((TextInputLayout) findViewById(R.id.question)).setHint("Level " + questionData.getLevel().toString() + ":");
+        ((TextInputEditText) findViewById(R.id.lblQuestion)).setText(questionData.getQuestion());
+        ((TextView) findViewById(R.id.teamname)).setText(questionData.getTeamName());
 //        ((TextView) findViewById(R.id.txtAnswer)).setHint("Answer here with length:"+questionData.getAnsLength());
         ((TextInputLayout) findViewById(R.id.lytAnswer)).setCounterMaxLength(questionData.getAnsLength());
         if(hint!=null) {
@@ -294,12 +298,13 @@ public class MainActivity extends AppCompatActivity {
             hintBox.setVisibility(View.VISIBLE);
             hintText.setText(hint);
         }
-        ((TextView) findViewById(R.id.lblHintText)).setText(questionData.getHint());
-        ((Toolbar) findViewById(R.id.toolbar)).setTitle(questionData.getTeamName());
+        ((TextInputEditText) findViewById(R.id.txtAnswer)).setText("");
     }
-
     private void createAndShowTimer(Integer countdown, Integer tick){
-        new CountDownTimer(countdown, tick) {
+
+        if (mCounter!=null)
+            mCounter.cancel();
+        mCounter = new CountDownTimer(countdown, tick) {
             public void onTick(long millisUntilFinished) {
                 // Used for formatting digit to be in 2 digits only
                 NumberFormat f = new DecimalFormat("00");
@@ -315,7 +320,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }.start();
     }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -336,7 +340,6 @@ public class MainActivity extends AppCompatActivity {
         hintText=findViewById(R.id.lblHintText);
         btnUnlockHint=findViewById(R.id.btnUnlockHint);
     }
-
     public void btnUnlockHint(View view) {
 
             builder=new AlertDialog.Builder(MainActivity.this);
@@ -421,7 +424,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
     private Task<String> unlockHint() {
 
         Map<String,Object> data = new HashMap<>();
@@ -441,5 +443,9 @@ public class MainActivity extends AppCompatActivity {
                             return "<<Error>>";
                     }
                 });
+    }
+
+    public void lblTeamNameClickShowDeviceId(View view) {
+        Toast.makeText(MainActivity.this,"DeviceId: "+deviceId,Toast.LENGTH_SHORT).show();
     }
 }

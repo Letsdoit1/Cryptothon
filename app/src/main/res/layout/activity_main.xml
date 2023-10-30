@@ -95,8 +95,9 @@
             android:id="@+id/teamname"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:text="SE team"
+            android:text="Team Name"
             android:gravity="center"
+            android:onClick="lblTeamNameClickShowDeviceId"
             android:fontFamily="@font/gagalin"
             android:textColor="#ED3237"
             android:textSize="25dp"
@@ -125,7 +126,7 @@
             android:id="@+id/lblLevel"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:text="Level "
+            android:text=""
             android:gravity="center"
             android:layout_below="@id/teamname"
             android:fontFamily="@font/gagalin"
@@ -169,7 +170,7 @@
                 android:layout_height="150dp"
                 android:enabled="false"
                 android:focusable="false"
-                android:textColor="#000" />
+                android:textColor="#cccccc" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -190,7 +191,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:textColor="#000"
+                android:textColor="#cccccc"
                 android:fontFamily="@font/font1"
                 />
 
