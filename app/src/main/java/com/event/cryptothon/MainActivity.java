@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
     private Task<QuestionData> getQuestion() {
         Map<String,Object> data = new HashMap<>();
         data.put("teamCode", teamCode);
+        data.put("deviceId",deviceId);
         return mFunctions.getHttpsCallable("getQuestion")
                 .call(data)
                 .continueWith(new Continuation<HttpsCallableResult, QuestionData>() {
@@ -168,6 +169,8 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
     public void btnClickedSubmit(View view) {
+        Button btnSubmit = (Button)findViewById(R.id.btnSubmit);
+        btnSubmit.setEnabled(false);
         String ans = ((TextView)findViewById(R.id.txtAnswer)).getText().toString();
         if(ans == null || ans.trim().isEmpty())
         {
@@ -181,6 +184,7 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<QuestionData>() {
                     @Override
                     public void onComplete(@NonNull Task<QuestionData> task) {
+                        btnSubmit.setEnabled(true);
                         if (!task.isSuccessful()) {
                             Exception e = task.getException();
                             String error = null;
@@ -291,12 +295,17 @@ public class MainActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.teamname)).setText(questionData.getTeamName());
 //        ((TextView) findViewById(R.id.txtAnswer)).setHint("Answer here with length:"+questionData.getAnsLength());
         ((TextInputLayout) findViewById(R.id.lytAnswer)).setCounterMaxLength(questionData.getAnsLength());
-        if(hint!=null) {
+        hint = questionData.getHint();
+        hintText.setText(hint);
+        if(hint != null) {
 //            ((Button) findViewById(R.id.btnUnlockHint)).setEnabled(false);
             btnUnlockHint.setVisibility(View.GONE);
             hintUI.setBackgroundColor(Color.rgb(52, 165, 235));
             hintBox.setVisibility(View.VISIBLE);
-            hintText.setText(hint);
+        }else{
+            btnUnlockHint.setVisibility(View.VISIBLE);
+            hintUI.setBackgroundColor(0x99000000);
+            hintBox.setVisibility(View.GONE);
         }
         ((TextInputEditText) findViewById(R.id.txtAnswer)).setText("");
     }

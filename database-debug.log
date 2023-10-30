@@ -1,9 +1,9 @@
-11:21:49.529 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
-11:21:49.675 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9000
-11:21:50.049 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO com.firebase.core.namespace.NamespaceActor - codethon-1-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 161ms, init: 0ms
-11:21:50.348 [FirebaseWorkerPool-1-3] WARN com.firebase.core.persistence.backend.dummy.EmulatorMetadataPersistence - Multiple projectIds are not recommended in single project mode. Requested 
+22:41:23.103 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
+22:41:23.247 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9000
+22:41:23.590 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO com.firebase.core.namespace.NamespaceActor - codethon-1-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 137ms, init: 0ms
+22:41:23.777 [FirebaseWorkerPool-1-3] WARN com.firebase.core.persistence.backend.dummy.EmulatorMetadataPersistence - Multiple projectIds are not recommended in single project mode. Requested 
 namespace codethon-1, but the emulator is configured for codethon-1-default-rtdb. To 
 opt-out of single project mode add/set the singleProjectMode: false property in 
 the firebase.json emulators config. 
-11:21:50.354 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO com.firebase.core.namespace.NamespaceActor - codethon-1 successfully activated FBKV (SurveyIdle(0)) wait: 2ms, init: 0ms
-11:22:06.506 [NamespaceSystem-blocking-namespace-operation-dispatcher-18] INFO com.firebase.core.namespace.StateManager - Namespace codethon-1-default-rtdb status Active to Active
+22:41:23.781 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO com.firebase.core.namespace.NamespaceActor - codethon-1 successfully activated FBKV (SurveyIdle(0)) wait: 1ms, init: 0ms
+22:41:40.469 [NamespaceSystem-blocking-namespace-operation-dispatcher-17] INFO com.firebase.core.namespace.StateManager - Namespace codethon-1-default-rtdb status Active to Active

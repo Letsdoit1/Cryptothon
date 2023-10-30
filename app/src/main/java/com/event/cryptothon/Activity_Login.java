@@ -6,10 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.text.Editable;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +28,9 @@ public class Activity_Login extends AppCompatActivity {
 
     private String deviceId;
 
-    String errorRecieved;
+    String errorReceived;
+
+    String alreadyRegistered;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +45,9 @@ public class Activity_Login extends AppCompatActivity {
 
     public void onClickedLoginBtn(View view) {
         String pwd = ((TextView)findViewById(R.id.txtPwd)).getText().toString();
-        if(pwd==null || pwd.isEmpty()) {
-            Toast.makeText(Activity_Login.this,"Empty, Please enter shared password to continue.",Toast.LENGTH_SHORT);
+        if(pwd==null || pwd.trim().isEmpty()) {
+            Toast.makeText(Activity_Login.this,"Empty, Please enter shared password to continue.",Toast.LENGTH_SHORT).show();
+            return ;
         }
         checkPwdAndRegister(deviceId, pwd)
                 .addOnCompleteListener(new OnCompleteListener<RegistrationDetails>() {
@@ -68,16 +69,20 @@ public class Activity_Login extends AppCompatActivity {
                             return;
                         }
                         RegistrationDetails rd = task.getResult();
-                        if (rd!=null && rd.isWrongTeamCode())
-                            Toast.makeText(Activity_Login.this, getString(R.string.wrong_pwd_msg),Toast.LENGTH_SHORT).show();
-                        else if(rd.isRegisteredSuccessfully()){
+                        if (rd == null){
+                            if(alreadyRegistered==null) {
+                                Intent intent = new Intent(Activity_Login.this, Activity_Error.class);
+                                intent.putExtra("ERROR_MSG", errorReceived);
+                                startActivity(intent);
+                                finish();
+                            }else{
+                                alreadyRegistered = null;
+                            }
+                        }else if (rd!=null && rd.isWrongTeamCode()) {
+                            Toast.makeText(Activity_Login.this, getString(R.string.wrong_pwd_msg), Toast.LENGTH_SHORT).show();
+                        } else if(rd.isRegisteredSuccessfully()){
                             Intent intent = new Intent(Activity_Login.this, MainActivity.class);
                             intent.putExtra("TEAM_CODE",pwd);
-                            startActivity(intent);
-                            finish();
-                        }else if (rd == null){
-                            Intent intent = new Intent(Activity_Login.this, Activity_Error.class);
-                            intent.putExtra("ERROR_MSG",errorRecieved);
                             startActivity(intent);
                             finish();
                         }else{
@@ -101,10 +106,15 @@ public class Activity_Login extends AppCompatActivity {
                     public RegistrationDetails then(@NonNull Task<HttpsCallableResult> task) throws Exception {
                         Map<String, Object> result = (Map<String, Object>) task.getResult().getData();
                         if(result==null ) {
-                            errorRecieved = "checkPwdAndRegister(): null result received from Server";
+                            errorReceived = "checkPwdAndRegister(): null result received from Server";
                             return null;
                         }else if(result.containsKey("error")){
-                            errorRecieved = "checkPwdAndRegister(): Error Recieved: "+result.get("error").toString();
+                            errorReceived = "checkPwdAndRegister(): Error Recieved: "+result.get("error").toString();
+                            return null;
+                        }
+                        if(result.containsKey("alreadyRegistered")) {
+                            alreadyRegistered = (String) result.get("alreadyRegistered");
+                            Toast.makeText(Activity_Login.this, "Device already registered.", Toast.LENGTH_SHORT);
                             return null;
                         }
                         RegistrationDetails rd = new RegistrationDetails();

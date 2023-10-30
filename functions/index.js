@@ -60,6 +60,7 @@ exports.checkAnswer = onCall(async (req)=>{
       if(hint == true){
         logger.debug("Hint was used in correct ans. Now updating existing record.");
         await getDatabase().ref(`/teams/${teamCode}/scoreCard/${level}`).update({
+            hintUsed: true,
             isSuccess: true,
             time: (new Date()).toISOString(),
             deviceId: deviceID,
@@ -76,7 +77,7 @@ exports.checkAnswer = onCall(async (req)=>{
       msg = "Success";
     }
     logger.debug("before calling get question function.");
-    var newQuestion = await getQuestionFunction(teamCode);
+    var newQuestion = await getQuestionFunction(teamCode,deviceId);
     newQuestion.msg = msg;
     logger.debug("Updated question with Answer msg: "+JSON.stringify(newQuestion));
     return newQuestion;
@@ -85,7 +86,7 @@ exports.checkAnswer = onCall(async (req)=>{
   }
 });
 
-async function getQuestionFunction(teamCode){
+async function getQuestionFunction(teamCode, deviceId){
   // const teamCode = req.data.teamCode;
   let teamName = null;
   let level = 0;
@@ -95,12 +96,13 @@ async function getQuestionFunction(teamCode){
   let ansLength = null;
   //Codes: EventNotStarted, EventEnded, EndGame
   let customCode = null;
-  let qri;
+  let qri; let qrt; let est; let eet;
   try{
     var noQuestionSolved = true;
     var lastSolvedQuestionNumber = 0;
     var lastSolvedQuestionTime = null;
     let currentTime = new Date();
+    let noOfQuestions;
     logger.debug("Just after try block team Code: "+teamCode);
     // To check if user previously solved any question or not if yes then which was the last question solved
     await getDatabase().ref(`/teams/${teamCode}`).get()
@@ -120,6 +122,7 @@ async function getQuestionFunction(teamCode){
                   noQuestionSolved = false;
                   lastSolvedQuestionNumber = Number(scoreCardSnapshot.key);
                   lastSolvedQuestionTime = new Date(scoreCardSnapshot.child("time").val());
+                  logger.debug("lastSolvedQuestionNumber: "+lastSolvedQuestionNumber+", lastSolvedQuestionTime: "+lastSolvedQuestionTime.toISOString());
                 }
               });
             }
@@ -131,56 +134,84 @@ async function getQuestionFunction(teamCode){
         //converted to MilliSeconds
         // logger.debug("questionReleaseInterval Data requested: "+qri);
       });
+    await getDatabase().ref("/master/questionReleaseTime").get()
+    .then( async (qrtSnapshot)=> {
+        // logger.debug("Getting questionReleaseTime: "+JSON.stringify(qrtSnapshot));
+          qrt = new Date(qrtSnapshot.val()); //QuestionReleaseTime
+          logger.debug("questionReleaseTime Data requested: "+qrt.toLocaleString()+", "+JSON.stringify(qrtSnapshot));
+      });
+      logger.debug("CurrentTime: "+currentTime.toLocaleString());
+
+    await getDatabase().ref("/master/endEventTime").get()
+    .then( async (eetSnapshot)=> {
+        // logger.debug("Getting endEventTime: "+JSON.stringify(eetSnapshot));
+        eet = new Date(eetSnapshot.val()); //Event End time
+        logger.debug("endEventTime Data requested: "+eet.toUTCString()+", "+JSON.stringify(eetSnapshot));
+      });
+    if((currentTime-eet)>=0){
+      customCode = "EventEnded";
+      logger.debug("Event Ended");
+      return {
+        code: customCode,
+        teamName: teamName
+      };
+    }
+    await getDatabase().ref("/master/eventStartTime").get()
+    .then( async (estSnapshot)=> {
+          // logger.debug("Getting EventStartTime: "+JSON.stringify(estSnapshot));
+          est = new Date(estSnapshot.val()); //Event Start time
+          logger.debug("eventStartTime Data requested: "+est.toLocaleString()+", "+JSON.stringify(estSnapshot));
+        });
+    // logger.debug("currentTime: "+currentTime.toLocaleString()+", qrt: "+qrt.toLocaleString());
+    let totalQuestionReleasedInterval = currentTime - est;
+    logger.debug("QuestionReleasedTime: "+totalQuestionReleasedInterval+" || if <1 EventNotStarted");
+    if (totalQuestionReleasedInterval<1){
+      customCode = "EventNotStarted";
+      logger.debug("Event Not Started");
+      return {
+        code: customCode,
+        teamName: teamName
+      };
+    }
+    if (totalQuestionReleasedInterval > qri) {
+      logger.debug("Number(Math.floor(totalQuestionReleasedInterval/qri)*qri): "+Number(Math.floor(totalQuestionReleasedInterval/qri)*qri));
+      qrt = new Date(est.valueOf()+Number(Math.floor(totalQuestionReleasedInterval/qri)*qri));
+      logger.debug("Updated Question Release time: "+qrt.toLocaleString());
+      await getDatabase().ref("/master/")
+          .update({questionReleaseTime:qrt});
+    }
+
+    await getDatabase().ref("/master/questionDetails").get().then( 
+      async (questionsSnapshot)=> {
+        // logger.debug("Getting questionsSnapshot: "+JSON.stringify(questionsSnapshot));
+        noOfQuestions = questionsSnapshot.numChildren();
+        logger.debug("noOfQuestions: "+noOfQuestions);
+      });
+
     logger.debug("Before starting case 1 & 2 team Code: "+teamCode);
     //Case1: No question solved by user
     if (noQuestionSolved) {
       // logger.debug("case1: noQuestionSolved yet");
-      logger.debug("CurrentTime: "+currentTime.toLocaleString());
-      let est; let qrt; let eet;
-      await getDatabase().ref("/master/endEventTime").get()
-      .then( async (eetSnapshot)=> {
-          // logger.debug("Getting endEventTime: "+JSON.stringify(eetSnapshot));
-          eet = new Date(eetSnapshot.val()); //Event End time
-          // logger.debug("endEventTime Data requested: "+eet.toUTCString()+", "+JSON.stringify(eetSnapshot));
-        });
-      if((currentTime-eet)>=0){
-        customCode = "EventEnded";
-        logger.debug("Event Ended");
-        return {
-          code: customCode,
-          teamName: teamName
-        };
-      }
-      await getDatabase().ref("/master/eventStartTime").get()
-      .then( async (estSnapshot)=> {
-            // logger.debug("Getting EventStartTime: "+JSON.stringify(estSnapshot));
-            est = new Date(estSnapshot.val()); //Event Start time
-            // logger.debug("eventStartTime Data requested: "+est.toLocaleString()+", "+JSON.stringify(estSnapshot));
+      logger.debug("Case 1 started.");
+      let tempLevel=0;
+      while(totalQuestionReleasedInterval>qri){
+        totalQuestionReleasedInterval = totalQuestionReleasedInterval - qri;
+        tempLevel++;
+        await getDatabase().ref(`/teams/${teamCode}/scoreCard/${tempLevel}`).get()
+          .then(async (scoreRecordSnapshot)=>{
+            let hintValue = false;
+            if(scoreRecordSnapshot.exists())
+              hintValue = scoreRecordSnapshot.child("hintUsed").val();
+            const obj1 = {
+              hintUsed: hintValue,
+              isSuccess: false,
+              time: (new Date(est.valueOf()+qri*Number(tempLevel))).toISOString(),
+              deviceId: deviceId,
+              };
+            // logger.debug("User did not answer any question: tempLevel: "+tempLevel+", "+JSON.stringify(obj1));
+            if(tempLevel<=noOfQuestions)
+              await getDatabase().ref(`/teams/${teamCode}/scoreCard/${tempLevel}`).set(obj1);
           });
-      await getDatabase().ref("/master/questionReleaseTime").get()
-      .then( async (qrtSnapshot)=> {
-          // logger.debug("Getting questionReleaseTime: "+JSON.stringify(qrtSnapshot));
-            qrt = new Date(qrtSnapshot.val()); //QuestionReleaseTime
-            // logger.debug("questionReleaseTime Data requested: "+qrt.toLocaleString()+", "+JSON.stringify(qrtSnapshot));
-        });
-        // logger.debug("currentTime: "+currentTime.toLocaleString()+", qrt: "+qrt.toLocaleString());
-      let totalQuestionReleasedInterval = currentTime - qrt;
-      logger.debug("Case1: No question solved by user, \n"+
-      "\nQuestionReleasedTime: "+totalQuestionReleasedInterval+" || if <1 EventNotStarted");
-      if (totalQuestionReleasedInterval<1){
-        customCode = "EventNotStarted";
-        logger.debug("Event Not Started");
-        return {
-          code: customCode,
-          teamName: teamName
-        };
-      }
-      if (totalQuestionReleasedInterval > qri) {
-        // currentQuestionReleaseInterval = totalQuestionReleasedInterval-qri;
-        qrt = new Date(qrt.valueOf()+qri);
-        logger.debug("Updated Question Release time: "+qrt.toLocaleString());
-        await getDatabase().ref("/master/")
-            .update({questionReleaseTime:qrt});
       }
       //Case 1: AvailableTime set
       availableTime = (new Date(qrt.valueOf()+qri))-currentTime;
@@ -190,19 +221,42 @@ async function getQuestionFunction(teamCode){
     } else {
       //Case 2: At least 1 question solved by user.
       logger.debug("Case 2: At least 1 question solved by user.");
-      //Case 2: Available time
-      availableTime = (currentTime - lastSolvedQuestionTime)%qri;
+
+      let userIdealTime = currentTime - lastSolvedQuestionTime;
+      logger.debug("userIdealTime: "+userIdealTime);
+
+      while(userIdealTime>qri){
+        userIdealTime = userIdealTime - qri;
+        lastSolvedQuestionNumber++;
+        logger.debug("Inside userIdealTime loop: "+userIdealTime);
+
+        await getDatabase().ref(`/teams/${teamCode}/scoreCard/${lastSolvedQuestionNumber}`).get()
+          .then(async (scoreRecordSnapshot) => {
+            let hintValue1;
+            logger.debug("Inside While lastSolvedQuestionNumber: "+lastSolvedQuestionNumber);
+            if(scoreRecordSnapshot.exists())
+              hintValue1 = scoreRecordSnapshot.child("hintUsed").val();
+              logger.debug("Inside While after snapshot read.");
+            const obj1 = {
+              hintUsed: hintValue1,
+              isSuccess: false,
+              time: (new Date(lastSolvedQuestionTime.valueOf()+Number(qri))).toISOString(),
+              deviceId: deviceId,
+              };
+            logger.debug("User did not answer question: lastSolvedQuestionTime: "+lastSolvedQuestionTime+", "+JSON.stringify(obj1));
+            if(lastSolvedQuestionNumber<=noOfQuestions)
+              await getDatabase().ref(`/teams/${teamCode}/scoreCard/${lastSolvedQuestionNumber}`).set(obj1);
+          });
+      }
       //Case 2: Level
-      logger.debug("CurrentTime: "+currentTime.toISOString()+", lastSolvedQuestionTime: "+
-      lastSolvedQuestionTime.toISOString()+", lastSolvedQuestionNumber"+lastSolvedQuestionNumber);
-      logger.debug("Up: "+(Math.floor((currentTime - lastSolvedQuestionTime)/qri) + 1));
-      level = Number(lastSolvedQuestionNumber) + Number(Math.floor((currentTime - lastSolvedQuestionTime)/qri)) + Number(1);
-      logger.debug("availableTime: "+availableTime+", "+level);
+      level = Number(lastSolvedQuestionNumber) + Number(1);
+      //Case 2: Available time
+      availableTime = qri - userIdealTime;
+      logger.debug("availableTime: "+availableTime+", level: "+level);
     }
 
     logger.debug("After case 1 & 2 team Code: "+teamCode);
     
-    let noOfQuestions;
     await getDatabase().ref("/master/questionDetails").get().then( 
       async (questionsSnapshot)=> {
         // logger.debug("Getting questionsSnapshot: "+JSON.stringify(questionsSnapshot));
@@ -273,7 +327,7 @@ async function getQuestionFunction(teamCode){
 }
 
 exports.getQuestion = onCall(async (req)=>{
-  return getQuestionFunction(req.data.teamCode);
+  return getQuestionFunction(req.data.teamCode,req.data.deviceId);
 });
 
 exports.checkPwdAndRegister = onCall(async (req)=>{
@@ -282,13 +336,33 @@ exports.checkPwdAndRegister = onCall(async (req)=>{
     const deviceId = req.data.deviceId;
     let wrongTeamCode = false;
     let registeredSuccessfully = false;
+    let alreadyRegistered;
     let device1;
     let device2;
     let device3;
     logger.info("checkPwdAndRegister Call: teamCode: "+teamCode+", deviceId: "+ deviceId);
+
+    await getDatabase().ref(`/devices/${deviceId}`).get()
+    .then((snapshot)=>{
+      logger.debug("Inside device check.");
+      if(snapshot.exists()){
+        logger.debug("Inside snapshot exist."+JSON.stringify(snapshot));
+        alreadyRegistered = snapshot.val();
+        logger.debug("Snapshot val."+alreadyRegistered);
+      }
+    });
+
+    if(alreadyRegistered){
+      logger.debug("If device already registered: "+alreadyRegistered);
+      return {
+          alreadyRegistered: alreadyRegistered,
+      };
+    }
+
     await getDatabase().ref(`/teams/${teamCode}`).get().then(async (snapshot)=>{
       logger.info("TeamExists: "+teamCode+", "+JSON.stringify(snapshot));
       if (snapshot.exists()) {
+        //No Device Registered add a new entry.
         const registeredDevicesList = snapshot.child("registeredDevices");
         if (!registeredDevicesList.exists()) {
           getDatabase().ref(`/teams/${teamCode}/registeredDevices`)
@@ -340,6 +414,7 @@ exports.checkPwdAndRegister = onCall(async (req)=>{
 
     return returnObject;
   }catch(error){
+    logger.debug("Error in Catch: "+JSON.stringify(error));
     return {
       error: error,
     }
