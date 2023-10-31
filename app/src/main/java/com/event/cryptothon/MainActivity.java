@@ -29,7 +29,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.FirebaseFunctionsException;
 import com.google.firebase.functions.HttpsCallableResult;
-
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.HashMap;
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private TextInputLayout hintBox;
     private RelativeLayout hintUI;
     private TextInputEditText hintText;
-
+    private CircularProgressIndicator spinner;
     CountDownTimer mCounter;
 
     @Override
@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<QuestionData>() {
                     @Override
                     public void onComplete(@NonNull Task<QuestionData> task) {
+						findViewById(R.id.spinner).setVisibility(View.GONE);
                         if (!task.isSuccessful()) {
                             Exception e = task.getException();
                             String error = null;
@@ -185,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuestionData> task) {
                         btnSubmit.setEnabled(true);
+						findViewById(R.id.spinner).setVisibility(View.GONE);
                         if (!task.isSuccessful()) {
                             Exception e = task.getException();
                             String error = null;
@@ -398,6 +400,7 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<String>() {
                     @Override
                     public void onComplete(@NonNull Task<String> task) {
+						findViewById(R.id.spinner).setVisibility(View.GONE);	
                         if (!task.isSuccessful()) {
                             Exception e = task.getException();
                             String error = null;
@@ -415,7 +418,7 @@ public class MainActivity extends AppCompatActivity {
 
                         String hintMsg = task.getResult();
 
-                        if(hintMsg.equals("<<Error>>") || hintMsg==null){
+                        if(hintMsg.equals("<<Error>>") || hintMsg==null){												
                             String error = "DeviceId=" + deviceId + ", unlockHint(), " + "Error getting hint while unlocking.";
                             Log.w(TAG, error);
                             Intent intent = new Intent(MainActivity.this, Activity_Error.class);

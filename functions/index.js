@@ -14,6 +14,7 @@ const {logger}= require("firebase-functions/v2");
 const {getDatabase}= require("firebase-admin/database");
 const {initializeApp}= require("firebase-admin/app");
 const {Timestamp} = require("firebase-admin/firestore");
+const { log } = require("firebase-functions/logger");
 
 initializeApp();
 
@@ -63,7 +64,7 @@ exports.checkAnswer = onCall(async (req)=>{
             hintUsed: true,
             isSuccess: true,
             time: (new Date()).toISOString(),
-            deviceId: deviceID,
+            deviceId: deviceId,
           });
       }else{
         logger.debug("Hint was not used in correct ans. Now creating new record.");
@@ -73,6 +74,7 @@ exports.checkAnswer = onCall(async (req)=>{
           time: (new Date()).toISOString(),
           deviceId: deviceId,
         });
+
       }
       msg = "Success";
     }
@@ -225,34 +227,37 @@ async function getQuestionFunction(teamCode, deviceId){
       let userIdealTime = currentTime - lastSolvedQuestionTime;
       logger.debug("userIdealTime: "+userIdealTime);
 
+      var loopCounter=0;
       while(userIdealTime>qri){
+        loopCounter++;
         userIdealTime = userIdealTime - qri;
         lastSolvedQuestionNumber++;
         logger.debug("Inside userIdealTime loop: "+userIdealTime);
 
         await getDatabase().ref(`/teams/${teamCode}/scoreCard/${lastSolvedQuestionNumber}`).get()
           .then(async (scoreRecordSnapshot) => {
-            let hintValue1;
+            let hintValue1=false;
             logger.debug("Inside While lastSolvedQuestionNumber: "+lastSolvedQuestionNumber);
             if(scoreRecordSnapshot.exists())
               hintValue1 = scoreRecordSnapshot.child("hintUsed").val();
-              logger.debug("Inside While after snapshot read.");
             const obj1 = {
               hintUsed: hintValue1,
               isSuccess: false,
-              time: (new Date(lastSolvedQuestionTime.valueOf()+Number(qri))).toISOString(),
+              time: (new Date(lastSolvedQuestionTime.valueOf()+Number(qri)*Number(loopCounter))).toISOString(),
               deviceId: deviceId,
               };
-            logger.debug("User did not answer question: lastSolvedQuestionTime: "+lastSolvedQuestionTime+", "+JSON.stringify(obj1));
-            if(lastSolvedQuestionNumber<=noOfQuestions)
+            // logger.debug("While User did not answer question: lastSolvedQuestionTime: "+lastSolvedQuestionTime+", "+JSON.stringify(obj1));
+            // logger.debug("noOfQuestions: "+noOfQuestions+", lastSolvedQuestionNumber"+lastSolvedQuestionNumber);
+            if(lastSolvedQuestionNumber<=noOfQuestions){
               await getDatabase().ref(`/teams/${teamCode}/scoreCard/${lastSolvedQuestionNumber}`).set(obj1);
+            }
           });
       }
       //Case 2: Level
       level = Number(lastSolvedQuestionNumber) + Number(1);
       //Case 2: Available time
       availableTime = qri - userIdealTime;
-      logger.debug("availableTime: "+availableTime+", level: "+level);
+      // logger.debug("availableTime: "+availableTime+", level: "+level);
     }
 
     logger.debug("After case 1 & 2 team Code: "+teamCode);

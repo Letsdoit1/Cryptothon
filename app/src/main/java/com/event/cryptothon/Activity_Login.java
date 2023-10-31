@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +45,7 @@ public class Activity_Login extends AppCompatActivity {
     }
 
     public void onClickedLoginBtn(View view) {
+        ((Button)findViewById(R.id.btnLogin)).setEnabled(false);
         String pwd = ((TextView)findViewById(R.id.txtPwd)).getText().toString();
         if(pwd==null || pwd.trim().isEmpty()) {
             Toast.makeText(Activity_Login.this,"Empty, Please enter shared password to continue.",Toast.LENGTH_SHORT).show();
@@ -53,6 +55,7 @@ public class Activity_Login extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<RegistrationDetails>() {
                     @Override
                     public void onComplete(@NonNull Task<RegistrationDetails> task) {
+                        ((Button)findViewById(R.id.btnLogin)).setEnabled(true);
                         if (!task.isSuccessful()) {
                             Exception e = task.getException();
                             String error = null;
