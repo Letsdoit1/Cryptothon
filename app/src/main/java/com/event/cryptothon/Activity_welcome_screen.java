@@ -9,8 +9,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -31,6 +33,8 @@ public class Activity_welcome_screen extends AppCompatActivity {
     private FirebaseFunctions mFunctions;
     ImageView logo;
     TextView textLogo;
+
+    String teamPwd;
 
     @Override
     protected void onResume() {
@@ -76,15 +80,9 @@ public class Activity_welcome_screen extends AppCompatActivity {
                         }
                         RegistrationStatus isRegistered = null;
                         isRegistered = task.getResult();
+                        ((Button)findViewById(R.id.btnOk)).setVisibility(View.VISIBLE);
                         if (isRegistered!=null && isRegistered.isRegistered()){
-                            Intent intent = new Intent(Activity_welcome_screen.this, MainActivity.class);
-                            intent.putExtra("TEAM_CODE",isRegistered.getTeamPassword());
-                            startActivity(intent);
-                            finish();
-                        }
-                        else {
-                            startActivity(new Intent(Activity_welcome_screen.this, Activity_Login.class));
-                            finish();
+                            teamPwd = isRegistered.getTeamPassword();
                         }
                     }
                 });
@@ -106,7 +104,17 @@ public class Activity_welcome_screen extends AppCompatActivity {
                     }
                 });
     }
-
+    public void onOkClicked(View view) {
+        if(teamPwd!=null){
+            Intent intent = new Intent(Activity_welcome_screen.this, MainActivity.class);
+            intent.putExtra("TEAM_CODE",teamPwd);
+            startActivity(intent);
+            finish();
+        }else {
+            startActivity(new Intent(Activity_welcome_screen.this, Activity_Login.class));
+            finish();
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,7 +127,6 @@ public class Activity_welcome_screen extends AppCompatActivity {
 
         Animation textanimation = AnimationUtils.loadAnimation(this,R.anim.splash_animation_text);
         textLogo.startAnimation(textanimation);
-
-
+        ((Button)findViewById(R.id.btnOk)).setVisibility(View.GONE);
     }
 }

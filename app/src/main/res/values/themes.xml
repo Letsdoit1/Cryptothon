@@ -8,7 +8,6 @@
     <style name="Theme.Cryptothon" parent="Base.Theme.Cryptothon">
         <!--<item name="android:windowBackground">@drawable/app_background</item>
         <item name="android:textColor">#aaaaaa</item>-->
-        <item name="snackbarStyle">@style/MySnackBarStyle</item>
     </style>
 
     <style name="Theme.Cryptothon.welcome" parent="Theme.Cryptothon">

@@ -15,15 +15,27 @@
 
     <TextView
         android:id="@+id/text_id"
-        android:background="#041c24"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/logo_id"
         android:layout_centerInParent="true"
+        android:background="#041c24"
         android:fontFamily="@font/gagalin"
         android:text="Shall we play a game?"
         android:textColor="#38B6FF"
         android:textSize="20dp" />
+
+    <Button
+        android:id="@+id/btnOk"
+        android:layout_width="191dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/text_id"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="50dp"
+        android:backgroundTint="@color/button_state_colors"
+        android:text="Ok"
+        android:onClick="onOkClicked"
+        android:textSize="24sp" />
 
     <!--    F9E830 ED3237 38B6FF-->
 </RelativeLayout>

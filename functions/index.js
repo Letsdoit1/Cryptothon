@@ -14,6 +14,7 @@ const {logger}= require("firebase-functions/v2");
 const {getDatabase}= require("firebase-admin/database");
 const {initializeApp}= require("firebase-admin/app");
 const {Timestamp} = require("firebase-admin/firestore");
+const {onSchedule} = require("firebase-functions/v2/scheduler");
 
 initializeApp();
 
@@ -449,7 +450,12 @@ exports.isRegisteredDevice = onCall(async (req) => {
   };
 });
 
+// Manually run the task here https://console.cloud.google.com/cloudscheduler
+exports.schedulerOfScoreCard = onSchedule("*/2 * * * *", async (event) => {
 
+  logger.log("Scheduler Running");
+
+});
 
 exports.helloWorld = onRequest((request, response) => {
   logger.info("Hello logs! Hi", {structuredData: true});
