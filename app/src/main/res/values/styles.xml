@@ -21,5 +21,6 @@
 
     <style name="ThemeOverlay.App.CircularProgressIndicator" parent="">
         <item name="colorPrimary">#38B6FF</item>
-    </style>																	
+    </style>
+
 </resources>

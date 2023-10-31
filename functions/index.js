@@ -14,7 +14,6 @@ const {logger}= require("firebase-functions/v2");
 const {getDatabase}= require("firebase-admin/database");
 const {initializeApp}= require("firebase-admin/app");
 const {Timestamp} = require("firebase-admin/firestore");
-const { log } = require("firebase-functions/logger");
 
 initializeApp();
 
@@ -449,6 +448,8 @@ exports.isRegisteredDevice = onCall(async (req) => {
     teamPassword: teamCode,
   };
 });
+
+
 
 exports.helloWorld = onRequest((request, response) => {
   logger.info("Hello logs! Hi", {structuredData: true});

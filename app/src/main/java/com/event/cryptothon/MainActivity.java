@@ -3,6 +3,7 @@ package com.event.cryptothon;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.DialogInterface;
@@ -11,12 +12,14 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.provider.Settings;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.event.cryptothon.models.QuestionData;
 import com.google.android.gms.tasks.Continuation;
@@ -24,6 +27,7 @@ import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.functions.FirebaseFunctions;
@@ -170,22 +174,23 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
     public void btnClickedSubmit(View view) {
-        Button btnSubmit = (Button)findViewById(R.id.btnSubmit);
-        btnSubmit.setEnabled(false);
         String ans = ((TextView)findViewById(R.id.txtAnswer)).getText().toString();
         if(ans == null || ans.trim().isEmpty())
         {
-            Toast.makeText(MainActivity.this, "Answer is empty. Enter some value.",Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "Answer is empty. Enter some value.",Toast.LENGTH_SHORT).show();
+            Snackbar.make(view, "Answer is empty. Enter some value.", Snackbar.LENGTH_SHORT).show();
             return;
         }
-        if(ans.length()!=questionData.getAnsLength())
-            Toast.makeText(MainActivity.this, "Wrong Answer, Try again.",Toast.LENGTH_SHORT).show();
+        if(ans.length()!=questionData.getAnsLength()) {
+//            Toast.makeText(MainActivity.this, "Wrong Answer, Try again.", Toast.LENGTH_SHORT).show();
+            Snackbar.make(view, "Wrong Answer, Try again.", Snackbar.LENGTH_SHORT).show();
+            return;
+        }
 
         checkAnswer(ans)
                 .addOnCompleteListener(new OnCompleteListener<QuestionData>() {
                     @Override
                     public void onComplete(@NonNull Task<QuestionData> task) {
-                        btnSubmit.setEnabled(true);
 						findViewById(R.id.spinner).setVisibility(View.GONE);
                         if (!task.isSuccessful()) {
                             Exception e = task.getException();
@@ -227,10 +232,12 @@ public class MainActivity extends AppCompatActivity {
                                 ((Toolbar) findViewById(R.id.toolbar)).setTitle(questionData.getTeamName());
                             }else if(questionData.getMsg()!=null){
                                 if(questionData.getMsg().equals("Success")){
-                                    Toast.makeText(MainActivity.this,"Successful !!",Toast.LENGTH_SHORT).show();
+//                                    Toast.makeText(MainActivity.this,"Successful !!",Toast.LENGTH_SHORT).show();
+                                    Snackbar.make(view, "Successful !!", Snackbar.LENGTH_SHORT).show();
                                     updateUI();
                                 }else if(questionData.getMsg().equals("TryAgain")){
-                                    Toast.makeText(MainActivity.this,"Wrong Answer, Try again.",Toast.LENGTH_SHORT).show();
+//                                    Toast.makeText(MainActivity.this,"Wrong Answer, Try again.",Toast.LENGTH_SHORT).show();
+                                    Snackbar.make(view, "Wrong Answer, Try again.", Snackbar.LENGTH_SHORT).show();
                                 }
                             }else {
                                 updateUI();
@@ -249,7 +256,6 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
     private Task<QuestionData> checkAnswer(String ans) {
-
         Map<String,Object> data = new HashMap<>();
         data.put("level", questionData.getLevel());
         data.put("ans",ans);
@@ -259,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
             data.put("hintTaken", false);
         data.put("teamCode", teamCode);
         data.put("deviceId",deviceId);
-
+        ((Button)findViewById(R.id.btnSubmit)).setEnabled(false);
         return mFunctions.getHttpsCallable("checkAnswer")
                 .call(data)
                 .continueWith(new Continuation<HttpsCallableResult, QuestionData>() {
@@ -285,6 +291,7 @@ public class MainActivity extends AppCompatActivity {
                             qd.setAnsLength((Integer) result.get("ansLength"));
                             qd.setMsg((String) result.get("msg"));
                         }
+                        ((Button)findViewById(R.id.btnSubmit)).setEnabled(true);
                         return qd;
                     }
                 });
@@ -297,6 +304,18 @@ public class MainActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.teamname)).setText(questionData.getTeamName());
 //        ((TextView) findViewById(R.id.txtAnswer)).setHint("Answer here with length:"+questionData.getAnsLength());
         ((TextInputLayout) findViewById(R.id.lytAnswer)).setCounterMaxLength(questionData.getAnsLength());
+        ((TextInputEditText) findViewById(R.id.txtAnswer)).setText("");
+        btnUnlockHint=findViewById(R.id.btnUnlockHint);
+        EditText editText = (TextInputEditText) findViewById(R.id.txtAnswer);
+        editText.setFilters(new InputFilter[] {
+                new InputFilter.AllCaps() {
+                    @Override
+                    public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                        return String.valueOf(source).toLowerCase();
+                    }
+                },
+                new InputFilter.LengthFilter(questionData.getAnsLength())
+        });
         hint = questionData.getHint();
         hintText.setText(hint);
         if(hint != null) {
@@ -309,7 +328,7 @@ public class MainActivity extends AppCompatActivity {
             hintUI.setBackgroundColor(0x99000000);
             hintBox.setVisibility(View.GONE);
         }
-        ((TextInputEditText) findViewById(R.id.txtAnswer)).setText("");
+
     }
     private void createAndShowTimer(Integer countdown, Integer tick){
 
@@ -347,9 +366,8 @@ public class MainActivity extends AppCompatActivity {
         hintBox=findViewById(R.id.hint);
 
         hintUI=findViewById(R.id.hintUI);
-
         hintText=findViewById(R.id.lblHintText);
-        btnUnlockHint=findViewById(R.id.btnUnlockHint);
+
     }
     public void btnUnlockHint(View view) {
 
@@ -458,6 +476,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void lblTeamNameClickShowDeviceId(View view) {
-        Toast.makeText(MainActivity.this,"DeviceId: "+deviceId,Toast.LENGTH_SHORT).show();
+//        Toast.makeText(MainActivity.this,"DeviceId: "+deviceId,Toast.LENGTH_SHORT).show();
+        Snackbar.make(view, "DeviceId: "+deviceId, Snackbar.LENGTH_SHORT).show();
     }
 }

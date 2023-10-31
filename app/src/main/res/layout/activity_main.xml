@@ -202,10 +202,9 @@
                 android:id="@+id/txtAnswer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text"
-                android:textColor="#cccccc"
                 android:fontFamily="@font/font1"
-                />
+                android:inputType="text|textEmailAddress"
+                android:textColor="#cccccc" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -216,11 +215,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/lytAnswer"
+            android:fontFamily="@font/font1"
             android:onClick="btnClickedSubmit"
             android:text="Submit"
-            android:fontFamily="@font/font1"
             android:textColor="#FFFFFF"
-            app:backgroundTint="#7aeb34"
+            app:backgroundTint="@color/button_state_colors"
             app:rippleColor="#000000" />
 
 
@@ -246,7 +245,8 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:onClick="btnUnlockHint"
-            android:text="Need Help?"
+            android:text="Unlock Hint"
+            android:textSize="24sp"
             app:backgroundTint="#4287f5" />
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/hint"

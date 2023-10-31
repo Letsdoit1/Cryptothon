@@ -45,7 +45,7 @@ public class Activity_Login extends AppCompatActivity {
     }
 
     public void onClickedLoginBtn(View view) {
-        ((Button)findViewById(R.id.btnLogin)).setEnabled(false);
+
         String pwd = ((TextView)findViewById(R.id.txtPwd)).getText().toString();
         if(pwd==null || pwd.trim().isEmpty()) {
             Toast.makeText(Activity_Login.this,"Empty, Please enter shared password to continue.",Toast.LENGTH_SHORT).show();
@@ -55,7 +55,6 @@ public class Activity_Login extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<RegistrationDetails>() {
                     @Override
                     public void onComplete(@NonNull Task<RegistrationDetails> task) {
-                        ((Button)findViewById(R.id.btnLogin)).setEnabled(true);
                         if (!task.isSuccessful()) {
                             Exception e = task.getException();
                             String error = null;
@@ -102,6 +101,7 @@ public class Activity_Login extends AppCompatActivity {
         Map<String,Object> data = new HashMap<>();
         data.put("deviceId", deviceId);
         data.put("teamCode",pwd);
+        ((Button)findViewById(R.id.btnLogin)).setEnabled(false);
         return mFunctions.getHttpsCallable("checkPwdAndRegister")
                 .call(data)
                 .continueWith(new Continuation<HttpsCallableResult, RegistrationDetails>() {
@@ -126,6 +126,7 @@ public class Activity_Login extends AppCompatActivity {
                         rd.setDeviceId1((String)result.get("deviceId1"));
                         rd.setDeviceId2((String)result.get("deviceId2"));
                         rd.setDeviceId3((String)result.get("deviceId3"));
+                        ((Button)findViewById(R.id.btnLogin)).setEnabled(true);
                         return rd;
                     }
                 });
