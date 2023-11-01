@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
                                 String title = null, message = null;
                                 if (questionData.getCode().equals("EventNotStarted")) {
                                     title = "Event Not Started";
-                                    message = "Please Wait";
+                                    message = "";
                                 } else if (questionData.getCode().equals("EventEnded")) {
                                     title = "Event Ended";
                                     message = "Thank You !!";
