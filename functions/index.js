@@ -8,8 +8,7 @@
  */
 
 // import firebase from "firebase/app";
-const {onRequest, onCall}=
-require("firebase-functions/v2/https");
+const {onRequest, onCall} = require("firebase-functions/v2/https");
 const {logger}= require("firebase-functions/v2");
 const {getDatabase}= require("firebase-admin/database");
 const {initializeApp}= require("firebase-admin/app");
@@ -20,6 +19,91 @@ initializeApp();
 
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
+
+exports.helloWorld = onRequest((request, response) => {
+  logger.info("Hello logs! Hi");
+  response.send("Hello from Crypto-thon!");
+  createScoreCard();
+});
+
+async function createScoreCard(){
+  var allScores = new Array();
+  var allRanks = new Array();
+  // Call get question function it will calculate score of each Team.
+  await getDatabase().ref("/teams").get().then(async function(snapshot) {
+    const teamCodeSnapshot = snapshot.val();
+    for (const key in teamCodeSnapshot) {
+        // console.log(`child key: ${key}`)
+        // console.log(`child value: `+JSON.stringify(teamCodeSnapshot[key]));
+        await getQuestionFunction(key,null);
+    }
+  });
+
+  // After calculation get scores from each team and add them in array
+  await getDatabase().ref("/teams").get().then(async (teamSnapshot)=>{
+    teamSnapshot.forEach((teamSnapshot)=>{
+    // Call get question function it will calculate score of each Team.
+      logger.debug("Getting team score data: "+JSON.stringify(teamSnapshot));
+      var teamScoreCard = {
+        teamName: teamSnapshot.key,
+        score: teamSnapshot.child("teamScore").val(),
+        level: teamSnapshot.child("calculatedLevel").val(),
+        lastSolvedInterval: teamSnapshot.child("lastSolvedInterval").val()
+      };
+      allScores.push(teamScoreCard);
+    });
+  });
+  // logger.debug("AllScores: "+JSON.stringify(allScores));
+  allScores.sort(function compare(a,b){
+    return (b.score-a.score) || (a.lastSolvedInterval - b.lastSolvedInterval) || (a.teamName.localeCompare(b.teamName));
+  });
+  let rank = 1; 
+  // let ps=null; 
+  // let pi=null;
+  // logger.debug("AllScores: "+JSON.stringify(allScores));
+  // for(const scoreCards of allScores){
+  //   logger.debug("teamName: "+scoreCards.teamName+", previousTeamScore:"+previousTeamScore+
+  //   ", scoreCards.score:"+scoreCards.score+", previousTeamSolveInterval:"+previousTeamSolveInterval+", scoreCards.lastSolvedInterval: "+scoreCards.lastSolvedInterval);
+  //   if(index == 0 || (previousTeamScore === scoreCards.score && previousTeamSolveInterval === scoreCards.lastSolvedInterval)){
+  //     // If first index or previous teams score and last question solve interval is same then do not increase rank.
+  //   }else{
+  //     rank = rank + 1;
+  //   }
+  //   scoreCards.rank = rank;
+  //   previousTeamSolveInterval = scoreCards.lastSolvedInterval;
+  //   previousTeamScore = scoreCards.Score;
+  //   allRanks.push(scoreCards);
+  //   logger.debug("AllRank["+index+"]: "+JSON.stringify(scoreCards));
+  //   index++;
+  // }
+
+  // allScores.forEach((value,index)=>{
+  //   logger.debug("teamName: "+value.teamName+", previousTeamScore:"+ps+
+  //   ", value.score:"+value.score+", previousTeamSolveInterval:"+pi+", value.lastSolvedInterval: "+value.lastSolvedInterval);
+  //   if(index == 0 || (ps === value.score && pi === value.lastSolvedInterval)){
+  //     // If first index or previous teams score and last question solve interval is same then do not increase rank.
+  //   }else{
+  //     rank = rank + 1;
+  //   }
+  //   value.rank = rank;
+  //   pi = value.lastSolvedInterval;
+  //   ps = value.Score;
+  //   allRanks.push(value);
+  //   logger.debug("AllRank["+index+"]: "+JSON.stringify(value));
+  // });
+
+  allScores.forEach((value,index)=>{
+    value.rank = rank;
+    allRanks.push(value);
+    rank = rank + 1;
+    logger.debug("AllRank["+index+"]: "+JSON.stringify(value));
+  });
+
+  await getDatabase().ref("/scoreBoard").set(allRanks);
+
+  return allRanks;
+
+}
 
 exports.unlockHint = onCall(async (req)=>{
   var hint;
@@ -137,7 +221,7 @@ async function getQuestionFunction(teamCode, deviceId){
     await getDatabase().ref("/master/eventStartTime").get()
     .then( async (estSnapshot)=> {
           est = new Date(estSnapshot.val()); //Event Start time
-          logger.debug("eventStartTime Data requested: "+est.toLocaleString()+", "+JSON.stringify(estSnapshot));
+          // logger.debug("eventStartTime Data requested: "+est.toLocaleString()+", "+JSON.stringify(estSnapshot));
         });
     await getDatabase().ref("/master/questionReleaseInterval").get().then( async (qriSnapshot)=> {
         qri = qriSnapshot.val()*60*1000; //QuestionReleaseInterval
@@ -145,42 +229,42 @@ async function getQuestionFunction(teamCode, deviceId){
     // To check if user previously solved any question or not if yes then which was the last question solved
     await getDatabase().ref(`/teams/${teamCode}`).get()
         .then(async (teamDataSnapshot)=> {
-            logger.debug("TeamData: "+JSON.stringify(teamDataSnapshot));
+            // logger.debug("TeamData: "+JSON.stringify(teamDataSnapshot));
             teamName = teamDataSnapshot.child("teamName").val();
             if (!teamDataSnapshot.child("scoreCard").exists())
               noQuestionSolved = true;
             else{
-              logger.debug("Team ScoreCard: "+JSON.stringify(teamDataSnapshot));
+              // logger.debug("Team ScoreCard: "+JSON.stringify(teamDataSnapshot));
               lastSolvedQuestionTime = est; secondMaxQT = est;
               teamDataSnapshot.child("scoreCard").forEach((scoreCardSnapshot)=> {
-                logger.debug("ScoreCard: key="+scoreCardSnapshot.key+", "+JSON.stringify(scoreCardSnapshot));
+                // logger.debug("ScoreCard: key="+scoreCardSnapshot.key+", "+JSON.stringify(scoreCardSnapshot));
                 if(Number(scoreCardSnapshot.key)>lastSolvedQuestionNumber && scoreCardSnapshot.child("isSuccess").val() == true){
                   noQuestionSolved = false;
                   secondMaxQN = lastSolvedQuestionNumber;
                   secondMaxQT = lastSolvedQuestionTime;
                   lastSolvedQuestionNumber = Number(scoreCardSnapshot.key);
                   lastSolvedQuestionTime = new Date(scoreCardSnapshot.child("time").val());
-                  logger.debug("lastSolvedQuestionNumber: "+lastSolvedQuestionNumber+", lastSolvedQuestionTime: "+lastSolvedQuestionTime.toISOString());
-                }else if(Number(scoreCardSnapshot.key)>secondMaxQN){
+                  // logger.debug("lastSolvedQuestionNumber: "+lastSolvedQuestionNumber+", lastSolvedQuestionTime: "+lastSolvedQuestionTime.toISOString());
+                }else if(Number(scoreCardSnapshot.key)>secondMaxQN && scoreCardSnapshot.child("isSuccess").val() == true){
                   secondMaxQN = Number(scoreCardSnapshot.key);
                   secondMaxQT = new Date(scoreCardSnapshot.child("time").val());
                 }
               });
               // Update last solved qustion interval
               const lastSolvedInterval = lastSolvedQuestionTime.valueOf() - secondMaxQT.valueOf();
-              logger.debug("lastSolvedInterval: "+lastSolvedQuestionTime+", lastSolvedQuestionTime: "+lastSolvedQuestionTime.toISOString()+", secondMaxQT: "+secondMaxQT.toISOString());
+              logger.debug("lastSolvedInterval: "+lastSolvedInterval+", lastSolvedQuestionTime: "+lastSolvedQuestionTime.toISOString()+", secondMaxQT: "+secondMaxQT.toISOString());
               await getDatabase().ref(`/teams/${teamCode}`).update({lastSolvedInterval: lastSolvedInterval});
             }
         });
     await getDatabase().ref("/master/questionReleaseTime").get().then( async (qrtSnapshot)=> {
           qrt = new Date(qrtSnapshot.val()); //QuestionReleaseTime
-          logger.debug("questionReleaseTime Data requested: "+qrt.toLocaleString()+", "+JSON.stringify(qrtSnapshot));
+          // logger.debug("questionReleaseTime Data requested: "+qrt.toLocaleString()+", "+JSON.stringify(qrtSnapshot));
       });
-      logger.debug("CurrentTime: "+currentTime.toLocaleString());
+      // logger.debug("CurrentTime: "+currentTime.toLocaleString());
 
     await getDatabase().ref("/master/endEventTime").get().then( async (eetSnapshot)=> {
         eet = new Date(eetSnapshot.val()); //Event End time
-        logger.debug("endEventTime Data requested: "+eet.toUTCString()+", "+JSON.stringify(eetSnapshot));
+        // logger.debug("endEventTime Data requested: "+eet.toUTCString()+", "+JSON.stringify(eetSnapshot));
       });
     if((currentTime-eet)>=0){
       customCode = "EventEnded";
@@ -193,11 +277,11 @@ async function getQuestionFunction(teamCode, deviceId){
     // logger.debug("currentTime: "+currentTime.toLocaleString()+", qrt: "+qrt.toLocaleString());
     // In event total time interval since start of event
     let totalQuestionReleasedInterval = currentTime - est;
-    logger.debug("QuestionReleasedTime: "+totalQuestionReleasedInterval+" || if <1 EventNotStarted");
+    // logger.debug("QuestionReleasedTime: "+totalQuestionReleasedInterval+" || if <1 EventNotStarted");
     // Event not started yet
     if (totalQuestionReleasedInterval<1){
       customCode = "EventNotStarted";
-      logger.debug("Event Not Started");
+      // logger.debug("Event Not Started");
       return {
         code: customCode,
         teamName: teamName
@@ -205,34 +289,33 @@ async function getQuestionFunction(teamCode, deviceId){
     }
     // Time expired since last question released
     if (totalQuestionReleasedInterval > qri) {
-      logger.debug("Number(Math.floor(totalQuestionReleasedInterval/qri)*qri): "+Number(Math.floor(totalQuestionReleasedInterval/qri)*qri));
+      // logger.debug("Number(Math.floor(totalQuestionReleasedInterval/qri)*qri): "+Number(Math.floor(totalQuestionReleasedInterval/qri)*qri));
       qrt = new Date(est.valueOf()+Number(Math.floor(totalQuestionReleasedInterval/qri)*qri));
-      logger.debug("Updated Question Release time: "+qrt.toLocaleString());
+      // logger.debug("Updated Question Release time: "+qrt.toLocaleString());
       await getDatabase().ref("/master/").update({questionReleaseTime:qrt});
     }
 
     // Total number of questions in event
     await getDatabase().ref("/master/questionDetails").get().then( async (questionsSnapshot)=> {
         noOfQuestions = questionsSnapshot.numChildren();
-        logger.debug("noOfQuestions: "+noOfQuestions);
+        // logger.debug("noOfQuestions: "+noOfQuestions);
       });
 
     // Get Scoring Master informaion
     await getDatabase().ref("/master/scoreRules").get().then( 
       async (scoreRulesSnapshot)=> {
-        logger.debug("scoreRulesSnapshot: "+JSON.stringify(scoreRulesSnapshot));
+        // logger.debug("scoreRulesSnapshot: "+JSON.stringify(scoreRulesSnapshot));
         hintScale = scoreRulesSnapshot.child("hintScale").val();
         successfulScale = scoreRulesSnapshot.child("successfulScale").val();
         unsuccessfulScale = scoreRulesSnapshot.child("unsuccessfulScale").val();
         initScoreValue = scoreRulesSnapshot.child("value").val();
-        logger.debug("hintScale: "+hintScale+", successfulScale: "+successfulScale+", unsuccessfulScale: "+unsuccessfulScale+", initScoreValue: "+initScoreValue);
+        // logger.debug("hintScale: "+hintScale+", successfulScale: "+successfulScale+", unsuccessfulScale: "+unsuccessfulScale+", initScoreValue: "+initScoreValue);
       });
 
-    logger.debug("Before starting case 1 & 2 team Code: "+teamCode);
+    // logger.debug("Before starting case 1 & 2 team Code: "+teamCode);
     //Case1: No question solved by user
     if (noQuestionSolved) {
-      // logger.debug("case1: noQuestionSolved yet");
-      logger.debug("Case 1 started.");
+      logger.debug("case1: noQuestionSolved yet");
       let tempLevel=0;
       while(totalQuestionReleasedInterval>qri){
         totalQuestionReleasedInterval = totalQuestionReleasedInterval - qri;
@@ -256,24 +339,24 @@ async function getQuestionFunction(teamCode, deviceId){
       availableTime = (new Date(qrt.valueOf()+qri))-currentTime;
       //Case 1: level set
       level = Math.floor((qrt-est)/qri) + 1; 
-      logger.debug("level calculated: "+level);
+      // logger.debug("level calculated: "+level);
     } else {
       //Case 2: At least 1 question solved by user.
       logger.debug("Case 2: At least 1 question solved by user.");
 
       let userIdealTime = currentTime - lastSolvedQuestionTime;
-      logger.debug("userIdealTime: "+userIdealTime);
+      // logger.debug("userIdealTime: "+userIdealTime);
 
       var loopCounter=0;
       while(userIdealTime>qri){
         loopCounter++;
         userIdealTime = userIdealTime - qri;
         lastSolvedQuestionNumber++;
-        logger.debug("Inside userIdealTime loop: "+userIdealTime);
+        // logger.debug("Inside userIdealTime loop: "+userIdealTime);
 
         await getDatabase().ref(`/teams/${teamCode}/scoreCard/${lastSolvedQuestionNumber}`).get()
           .then(async (scoreRecordSnapshot) => {
-            logger.debug("Inside While lastSolvedQuestionNumber: "+lastSolvedQuestionNumber);
+            // logger.debug("Inside While lastSolvedQuestionNumber: "+lastSolvedQuestionNumber);
             if(!scoreRecordSnapshot.exists()){
               const obj1 = {
                 hintUsed: false,
@@ -296,35 +379,26 @@ async function getQuestionFunction(teamCode, deviceId){
       availableTime = qri - userIdealTime;
       // logger.debug("availableTime: "+availableTime+", level: "+level);
     }
-    logger.debug("1");
-    // Update level at team score card for scoreboard calculation
 
+    logger.debug("After case 1 & 2 team Code: "+teamCode);
+
+    // Update level at team score card for scoreboard calculation
     await getDatabase().ref(`/teams/${teamCode}`).update({calculatedLevel: level});
-    logger.debug("2");
     // Calculate and update team score
     await getDatabase().ref(`/teams/${teamCode}/scoreCard`).get()
     .then(async (scoreCardSnapshot) => {
-      logger.debug("3");
       scoreCardSnapshot.forEach((scoreRecordSnapshot)=>{
-        logger.debug("4");
         const qn = Number(scoreRecordSnapshot.key);
-        logger.debug("5:qn:"+qn);
         if(scoreRecordSnapshot.child("isSuccess").val()==true)
           teamScore = teamScore +  Number(qn*successfulScale) +  Number(initScoreValue);
         else
           teamScore = teamScore - Number(qn*unsuccessfulScale) + Number(initScoreValue);
-        logger.debug("6");
         if(scoreRecordSnapshot.child("hintUsed").val()==true)
           teamScore = teamScore -  Number(qn*hintScale) + Number(initScoreValue);
-        logger.debug("7");
       });
     });
-    logger.debug("8");
     await getDatabase().ref(`/teams/${teamCode}`).update({teamScore: teamScore});
-    logger.debug("9");
 
-
-    logger.debug("After case 1 & 2 team Code: "+teamCode);
     // If level become more than Total questions in game then End game
     await getDatabase().ref("/master/questionDetails").get().then( 
       async (questionsSnapshot)=> {
@@ -332,7 +406,7 @@ async function getQuestionFunction(teamCode, deviceId){
         noOfQuestions = questionsSnapshot.numChildren();
         if (noOfQuestions<level){
           customCode = "EndGame";
-          logger.debug("End Game, user finished the game.");
+          // logger.debug("End Game, user finished the game.");
           return {
             code: customCode,
             teamName: teamName
@@ -342,34 +416,34 @@ async function getQuestionFunction(teamCode, deviceId){
         //Case 1: question set
         question = questionsSnapshot.child(level).child("questionText").val();
         //Case 1: hint set
-        logger.debug("Before checking hint.");
+        // logger.debug("Before checking hint.");
         await getDatabase().ref(`/teams/${teamCode}/scoreCard`).get()
           .then(async (scoreCardSnapshot)=>{
             if(scoreCardSnapshot.exists()){
-              logger.debug("scoreCard exists: "+JSON.stringify(scoreCardSnapshot));
+              // logger.debug("scoreCard exists: "+JSON.stringify(scoreCardSnapshot));
               await getDatabase().ref(`/teams/${teamCode}/scoreCard/${level}/hintUsed`).get()
                 .then(async (hintSnapshot)=>{
-                  logger.debug("Level: "+level+"hintSnapshot exists: "+JSON.stringify(hintSnapshot));
+                  // logger.debug("Level: "+level+"hintSnapshot exists: "+JSON.stringify(hintSnapshot));
                   if(hintSnapshot.exists() && hintSnapshot.val() == true){
                     hint = questionsSnapshot.child(level).child("hint").val();
-                    logger.debug("hint value: "+hint);
+                    // logger.debug("hint value: "+hint);
                   }
                 });
             }
           });
         //Case 1: Answer length
         ansLength = questionsSnapshot.child(level).child("answer").val().length;
-        logger.debug("Question at Level "+level+" = "+question+", Hint: "+hint);
+        // logger.debug("Question at Level "+level+" = "+question+", Hint: "+hint);
       });
     logger.debug("Before getting team name team Code: "+teamCode);
     await getDatabase().ref(`/teams/${teamCode}`).get().then(async (snapshot)=>{
       // logger.info("TeamExists: "+teamCode+", "+JSON.stringify(snapshot));
       teamName = snapshot.child("teamName").val();
     });
-    logger.debug("Check for custom code: "+customCode+", team name: "+teamName);
+    // logger.debug("Check for custom code: "+customCode+", team name: "+teamName);
 
     if(customCode!=null){
-      logger.debug("Inside custom Code not null");
+      // logger.debug("Inside custom Code not null");
       return {
         code: customCode,
         teamName: teamName
@@ -387,7 +461,7 @@ async function getQuestionFunction(teamCode, deviceId){
       ansLength: ansLength
     };
 
-    logger.debug("Return Question Object: "+JSON.stringify(strReturn));
+    logger.debug("Get Question Function Return Object: "+JSON.stringify(strReturn));
 
     return strReturn;
   } catch(error) {
@@ -521,7 +595,3 @@ exports.schedulerOfScoreCard = onSchedule("*/2 * * * *", async (event) => {
 
 });
 
-exports.helloWorld = onRequest((request, response) => {
-  logger.info("Hello logs! Hi", {structuredData: true});
-  response.send("Hello from Firebase! Sumant");
-});
