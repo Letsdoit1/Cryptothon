@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="105dp">
+
+
+    <TextView
+        android:id="@+id/lblRank"
+        android:layout_width="wrap_content"
+        android:gravity="center"
+        android:textSize="36sp"
+        android:layout_marginStart="15dp"
+        android:text="Rank"
+        android:textColor="@color/light_blue_600"
+        android:layout_marginEnd="5dp"
+        android:maxLines="1"
+        android:layout_marginTop="15dp"
+        android:layout_height="70dp"/>
+
+
+    <TextView
+        android:id="@+id/lblTeamName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="10dp"
+        android:layout_toEndOf="@+id/lblRank"
+        android:gravity="center"
+        android:text="Team Name"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/lblScore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lblTeamName"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        android:layout_toEndOf="@+id/lblRank"
+        android:gravity="center"
+        android:text="Score: "
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/lblLevel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lblTeamName"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        android:layout_toEndOf="@+id/lblScore"
+        android:gravity="center"
+        android:text="Level: "
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/border2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_alignParentBottom="true"
+        android:background="#808080"/>
+
+
+</RelativeLayout>

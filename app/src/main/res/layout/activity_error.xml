@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#041c24"
+    android:background="#FFFFFF"
     tools:context=".Activity_Error">
 
 
@@ -16,6 +16,8 @@
         android:layout_marginTop="158dp"
         android:layout_marginEnd="20dp"
         android:text="Error"
+        android:textStyle="bold"
+        android:fontFamily="@font/ad"
         android:textColor="#FF5722"
         android:textSize="34sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -30,6 +32,8 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="50dp"
         android:layout_marginEnd="20dp"
+        android:fontFamily="@font/ad"
+        android:textColor="#000000"
         android:text="Error occurred, please contact admin via your PL.\n"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

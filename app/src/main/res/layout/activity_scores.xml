@@ -43,24 +43,12 @@
                 android:layout_centerInParent="true"
                 android:layout_marginRight="10dp"
                 android:clickable="true"
+                android:onClick="onClickImgHome"
                 android:foreground="?attr/selectableItemBackground"
-
                 android:src="@drawable/baseline_home_24" />
         </RelativeLayout>
 
     </androidx.appcompat.widget.Toolbar>
-    <ScrollView
-        android:id="@+id/scrollview1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#ffffff"
-        android:layout_alignParentLeft="true"
-        app:layout_constraintBottom_toTopOf="@+id/hintUI"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/my_toolbar"
-        >
-
 
 
         <RelativeLayout
@@ -74,17 +62,15 @@
             app:layout_constraintTop_toBottomOf="@+id/my_toolbar">
 
 
-            <ListView
-                android:id="@+id/list"
-                android:layout_width="350dp"
-                android:divider="#000000"
-                android:dividerHeight="2dp"
-                android:listSelector="#F4C2C2"
-                android:layout_height="600dp" />
-
+            <androidx.recyclerview.widget.RecyclerView
+                android:nestedScrollingEnabled="false"
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:overScrollMode="never"
+                android:layout_height="wrap_content"/>
 
         </RelativeLayout>
-    </ScrollView>
+
     <RelativeLayout
         android:id="@+id/hintUI"
         android:layout_width="match_parent"

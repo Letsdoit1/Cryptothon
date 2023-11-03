@@ -1,15 +1,22 @@
 package com.event.cryptothon.models;
 
 public class ScoreRecord {
-    Integer rank;
+    String rank;
     String teamName;
-    Integer level;
+    String level;
+    String score;
+    public ScoreRecord(String rank, String teamName, String level, String score) {
+        this.rank = rank;
+        this.teamName = teamName;
+        this.level = level;
+        this.score = score;
+    }
 
-    public Integer getRank() {
+    public String getRank() {
         return rank;
     }
 
-    public void setRank(Integer rank) {
+    public void setRank(String rank) {
         this.rank = rank;
     }
 
@@ -21,21 +28,19 @@ public class ScoreRecord {
         this.teamName = teamName;
     }
 
-    public Integer getLevel() {
+    public String getLevel() {
         return level;
     }
 
-    public void setLevel(Integer level) {
+    public void setLevel(String level) {
         this.level = level;
     }
 
-    public Integer getScore() {
+    public String getScore() {
         return score;
     }
 
-    public void setScore(Integer score) {
+    public void setScore(String score) {
         this.score = score;
     }
-
-    Integer score;
 }

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:background="#041c24"
+    android:background="#FFFFFF"
     >
 
     <androidx.appcompat.widget.Toolbar
@@ -36,7 +36,6 @@
                 android:textColor="#FFFFFF"
                 android:textSize="25dp" />
 
-
             <ImageView
                 android:id="@+id/icon"
                 android:layout_width="50dp"
@@ -44,8 +43,8 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerInParent="true"
                 android:layout_marginRight="10dp"
+                android:visibility="gone"
                 android:clickable="true"
-
                 android:foreground="?attr/selectableItemBackground"
                 android:src="@drawable/scoreboard" />
         </RelativeLayout>
@@ -62,7 +61,8 @@
         app:layout_constraintBottom_toTopOf="@+id/hintUI"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        >
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/spinner"
@@ -89,29 +89,26 @@
 
         <!--        </com.google.android.material.textfield.TextInputLayout>-->
 
+
         <TextView
             android:id="@+id/lblTimer"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
+
             android:layout_toEndOf="@id/teamname"
-            android:text="00:00:00"
             android:fontFamily="@font/font1"
             android:gravity="right"
-
-            />
-
-
-        <TextView
-            android:id="@+id/teamname"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:text="Team Name"
-            android:gravity="center"
-            android:onClick="lblTeamNameClickShowDeviceId"
-            android:fontFamily="@font/gagalin"
-            android:textColor="#ED3237"
             android:textSize="25dp"
-
+            android:text="00:00:00"
+            android:textColor="#F4C2C2"
+            />
+        <ImageView
+            android:id="@+id/gif"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@id/lblTimer"
+            android:layout_alignRight="@id/lblLevel"
             />
 
 
@@ -133,16 +130,28 @@
         <!--        </com.google.android.material.textfield.TextInputLayout>-->
 
         <TextView
+            android:id="@+id/teamname"
+            android:layout_width="199dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/ad"
+            android:onClick="lblTeamNameClickShowDeviceId"
+            android:text="Team Name"
+            android:textColor="#38B6FF"
+            android:textSize="30dp"
+            android:gravity="left"
+            android:textStyle="bold"
+            />
+
+        <TextView
             android:id="@+id/lblLevel"
-            android:layout_width="150dp"
+            android:layout_width="199dp"
             android:layout_height="wrap_content"
             android:text=""
-            android:gravity="center"
             android:layout_below="@id/teamname"
-            android:fontFamily="@font/gagalin"
+            android:fontFamily="@font/ad"
             android:textColor="#F9E830"
-            android:textSize="25dp"
-
+            android:textSize="24dp"
+            android:gravity="left"
             />
 
         <!--        <com.google.android.material.textfield.TextInputLayout-->
@@ -171,18 +180,23 @@
             android:layout_below="@id/lblLevel"
             android:layout_marginTop="50px"
             android:layout_marginBottom="50px"
-            android:fontFamily="@font/font1"
+            android:fontFamily="@font/ad"
             android:hint="Question"
-            android:textColorHint="#FFFFFF"
+
+            android:textColorHint="#000000"
             >
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/lblQuestion"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
-                android:enabled="false"
+                android:scrollbars="vertical"
                 android:focusable="false"
-                android:textColor="#cccccc" />
+                android:textColor="#000000"
+                android:fontFamily="@font/ad"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -195,16 +209,21 @@
             app:counterEnabled="true"
             app:counterMaxLength="10"
             app:endIconMode="clear_text"
-            android:textColorHint="#FFFFFF"
+            android:textColorHint="#000000"
+
+
             >
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/txtAnswer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font1"
+                android:fontFamily="@font/ad"
                 android:inputType="text|textEmailAddress"
-                android:textColor="#cccccc" />
+                android:textColor="#000000"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -215,12 +234,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/lytAnswer"
-            android:fontFamily="@font/font1"
+            android:gravity="center"
+            android:layout_centerHorizontal="true"
             android:onClick="btnClickedSubmit"
             android:text="Submit"
+            android:fontFamily="@font/ad"
             android:textColor="#FFFFFF"
             app:backgroundTint="@color/button_state_colors"
             app:rippleColor="#000000" />
+
+
 
 
     </RelativeLayout>
@@ -244,16 +267,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
+            android:fontFamily="@font/ad"
             android:onClick="btnUnlockHint"
             android:text="Unlock Hint"
-            android:textSize="24sp"
-            app:backgroundTint="#4287f5" />
+            android:textSize="15sp"
+            app:backgroundTint="#4287f5"
+            android:textColor="#FFFFFF"
+            />
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/hint"
             android:fontFamily="@font/font1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="hint"
+            android:hint="Hint"
             android:visibility="gone"
             android:layout_centerInParent="true"
             android:layout_margin="50px"
@@ -264,9 +290,9 @@
                 android:id="@+id/lblHintText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:enabled="false"
+                android:scrollbars="vertical"
                 android:focusable="false"
-                android:fontFamily="@font/font1"
+                android:fontFamily="@font/ad"
                 android:textColor="#FFFFFF"
                 />
 

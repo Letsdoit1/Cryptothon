@@ -3,7 +3,6 @@ package com.event.cryptothon;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.DialogInterface;
@@ -160,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             qd.setTime((Integer) result.get("time"));
                             qd.setLevel((Integer) result.get("level"));
-                            qd.setRank((Integer) result.get("rank"));
+                            qd.setRank((String) result.get("rank"));
                             qd.setMaxRank((Integer) result.get("maxRank"));
                             qd.setQuestion((String) result.get("question"));
                             qd.setHint((String) result.get("hint"));
@@ -283,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             qd.setTime((Integer) result.get("time"));
                             qd.setLevel((Integer) result.get("level"));
-                            qd.setRank((Integer) result.get("rank"));
+                            qd.setRank((String) result.get("rank"));
                             qd.setMaxRank((Integer) result.get("maxRank"));
                             qd.setQuestion((String) result.get("question"));
                             qd.setHint((String) result.get("hint"));
@@ -302,6 +301,7 @@ public class MainActivity extends AppCompatActivity {
         ((TextInputLayout) findViewById(R.id.question)).setHint("Level " + questionData.getLevel().toString() + ":");
         ((TextInputEditText) findViewById(R.id.lblQuestion)).setText(questionData.getQuestion());
         ((TextView) findViewById(R.id.teamname)).setText(questionData.getTeamName());
+        ((TextView) findViewById(R.id.lblLevel)).setText("Score: "+questionData.getRank());
 //        ((TextView) findViewById(R.id.txtAnswer)).setHint("Answer here with length:"+questionData.getAnsLength());
         ((TextInputLayout) findViewById(R.id.lytAnswer)).setCounterMaxLength(questionData.getAnsLength());
         ((TextInputEditText) findViewById(R.id.txtAnswer)).setText("");
@@ -478,5 +478,11 @@ public class MainActivity extends AppCompatActivity {
     public void lblTeamNameClickShowDeviceId(View view) {
 //        Toast.makeText(MainActivity.this,"DeviceId: "+deviceId,Toast.LENGTH_SHORT).show();
         Snackbar.make(view, "DeviceId: "+deviceId, Snackbar.LENGTH_SHORT).show();
+    }
+
+    public void onClickImgScoreBoard(View view) {
+        Intent intent = new Intent(MainActivity.this,Activity_Scores.class);
+        intent.putExtra("TEAM_CODE",teamCode);
+        startActivity(intent);
     }
 }

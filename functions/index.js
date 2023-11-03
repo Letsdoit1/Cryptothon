@@ -26,6 +26,12 @@ exports.helloWorld = onRequest((request, response) => {
   createScoreCard();
 });
 
+exports.getScoreBoard = onCall(async (req)=>{
+  logger.debug("getScoreBoard 1>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+  return await createScoreCard();
+  // logger.debug("getScoreBoard 2>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+});
+
 async function createScoreCard(){
   var allScores = new Array();
   var allRanks = new Array();
@@ -93,12 +99,14 @@ async function createScoreCard(){
   // });
 
   allScores.forEach((value,index)=>{
-    value.rank = rank;
+    value.score = value.score+"";
+    value.level = value.level+"";
+    value.lastSolvedInterval = value.lastSolvedInterval+"";
+    value.rank = rank+"";
     allRanks.push(value);
     rank = rank + 1;
-    logger.debug("AllRank["+index+"]: "+JSON.stringify(value));
   });
-
+  logger.debug("AllRank: "+JSON.stringify(allRanks));
   await getDatabase().ref("/scoreBoard").set(allRanks);
 
   return allRanks;
@@ -454,7 +462,7 @@ async function getQuestionFunction(teamCode, deviceId){
       teamName: teamName,
       time: availableTime,
       level: level,
-      rank: 1,
+      rank: teamScore+"",
       maxRank: 50,
       question: question,
       hint: hint,

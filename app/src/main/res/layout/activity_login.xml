@@ -4,12 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#041c24"
+    android:background="#FFFFFF"
     tools:context=".Activity_Login">
 
     <ImageView
         android:id="@+id/imgIcon"
-        android:layout_width="0dp"
+        android:layout_width="131dp"
         android:layout_height="0dp"
         android:layout_marginStart="150dp"
         android:layout_marginTop="150dp"
@@ -20,7 +20,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/bg" />
+        app:srcCompat="@drawable/main_logo" />
 
     <TextView
         android:id="@+id/lblEnterPwd"
@@ -30,8 +30,11 @@
         android:layout_marginTop="50dp"
         android:layout_marginEnd="30dp"
         android:text="Enter Password"
+        android:textStyle="bold"
+        android:textSize="34dp"
         android:textAlignment="center"
-        android:textColor="#957A9A"
+        android:textColor="#000000"
+        android:fontFamily="@font/ad"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imgIcon" />
@@ -47,8 +50,9 @@
         android:inputType="textCapCharacters"
         android:maxLength="5"
         android:text=""
+        android:fontFamily="@font/ad"
         android:textAlignment="center"
-        android:textColor="#ffffff"
+        android:textColor="#000000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lblEnterPwd" />
@@ -61,8 +65,10 @@
         android:layout_marginTop="20dp"
         android:layout_marginEnd="30dp"
         android:backgroundTint="@color/button_state_colors"
+        android:fontFamily="@font/ad"
         android:onClick="onClickedLoginBtn"
         android:text="Login"
+        android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtPwd" />
