@@ -180,7 +180,6 @@
             android:layout_below="@id/lblLevel"
             android:layout_marginTop="50px"
             android:layout_marginBottom="50px"
-            android:fontFamily="@font/ad"
             android:hint="Question"
 
             android:textColorHint="#000000"
@@ -191,11 +190,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
                 android:scrollbars="vertical"
-                android:focusable="false"
+				android:cursorVisible="false"
+                android:focusable="false"			 
                 android:textColor="#000000"
-                android:fontFamily="@font/ad"
                 android:textSize="20dp"
-                android:textStyle="bold"
                 />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -218,11 +216,9 @@
                 android:id="@+id/txtAnswer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/ad"
                 android:inputType="text|textEmailAddress"
                 android:textColor="#000000"
                 android:textSize="20dp"
-                android:textStyle="bold"
                 />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -288,11 +284,11 @@
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/lblHintText"
+				android:cursorVisible="false"							 
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scrollbars="vertical"
                 android:focusable="false"
-                android:fontFamily="@font/ad"
                 android:textColor="#FFFFFF"
                 />
 

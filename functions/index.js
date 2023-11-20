@@ -397,11 +397,13 @@ async function getQuestionFunction(teamCode, deviceId){
     .then(async (scoreCardSnapshot) => {
       scoreCardSnapshot.forEach((scoreRecordSnapshot)=>{
         const qn = Number(scoreRecordSnapshot.key);
-        if(scoreRecordSnapshot.child("isSuccess").val()==true)
-          teamScore = teamScore +  Number(qn*successfulScale) +  Number(initScoreValue);
-        else
-          teamScore = teamScore - Number(qn*unsuccessfulScale) + Number(initScoreValue);
-        if(scoreRecordSnapshot.child("hintUsed").val()==true)
+        if(qn != level){
+          if(scoreRecordSnapshot.child("isSuccess").val()==true)
+            teamScore = teamScore +  Number(qn*successfulScale) +  Number(initScoreValue);
+          else
+            teamScore = teamScore - Number(qn*unsuccessfulScale) + Number(initScoreValue);
+        }
+        if(scoreRecordSnapshot.child("hintUsed").val()==true && qn < 23)
           teamScore = teamScore -  Number(qn*hintScale) + Number(initScoreValue);
       });
     });
